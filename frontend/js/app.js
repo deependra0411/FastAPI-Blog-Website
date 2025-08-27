@@ -202,7 +202,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Show unpublished toggle changed:', e.target.checked);
             if (app.getCurrentPage() === 'dashboard') {
                 console.log('Reloading user posts due to toggle change');
-                postsManager.loadUserPosts();
+                // Reset to page 1 when toggling filters
+                postsManager.loadUserPosts(1);
             }
         });
     }

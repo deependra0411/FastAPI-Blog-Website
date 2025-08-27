@@ -3,7 +3,7 @@ const CONFIG = {
     API_BASE_URL: 'http://localhost:8000/api/v1',
     APP_NAME: 'Python Coders',
     APP_TAGLINE: 'Start Learning Today',
-    POSTS_PER_PAGE: 3,
+    POSTS_PER_PAGE: 10,
     SOCIAL_LINKS: {
         twitter: 'https://twitter.com/',
         facebook: 'https://www.facebook.com/',

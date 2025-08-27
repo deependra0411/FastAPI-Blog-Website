@@ -3,6 +3,8 @@ class PostsManager {
     constructor() {
         this.currentPage = 1;
         this.totalPages = 1;
+        this.userPostsCurrentPage = 1;
+        this.userPostsTotalPages = 1;
         this.currentEditingPost = null;
     }
 
@@ -88,8 +90,48 @@ class PostsManager {
         paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
     }
 
+    // Render pagination for user posts
+    renderUserPostsPagination(response) {
+        const paginationContainer = document.getElementById('userPostsPagination');
+        if (!paginationContainer) return;
+
+        let paginationHTML = '';
+
+        // Previous button
+        if (response.page > 1) {
+            paginationHTML += `
+                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
+                    <i class="fas fa-arrow-left"></i> Previous Posts
+                </button>
+            `;
+        } else {
+            paginationHTML += '<span></span>'; // Empty span for spacing
+        }
+
+        // Page info
+        paginationHTML += `
+            <span class="pagination-info">
+                Page ${response.page} of ${response.total_pages} 
+                (${response.total} total posts)
+            </span>
+        `;
+
+        // Next button
+        if (response.page < response.total_pages) {
+            paginationHTML += `
+                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
+                    Next Posts <i class="fas fa-arrow-right"></i>
+                </button>
+            `;
+        } else {
+            paginationHTML += '<span></span>'; // Empty span for spacing
+        }
+
+        paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
+    }
+
     // Load and display user's posts in dashboard
-    async loadUserPosts() {
+    async loadUserPosts(page = 1) {
         if (!authManager.isAuthenticated()) {
             showPage('login');
             return;
@@ -97,10 +139,16 @@ class PostsManager {
 
         try {
             const showUnpublished = document.getElementById('showUnpublished')?.checked ?? false;
-            console.log('Loading user posts with showUnpublished:', showUnpublished);
-            const response = await api.getAllUserPosts(1, 10, showUnpublished);
+            console.log('Loading user posts with showUnpublished:', showUnpublished, 'page:', page);
+            const response = await api.getAllUserPosts(page, CONFIG.POSTS_PER_PAGE, showUnpublished);
             console.log('User posts response:', response);
+            
+            // Update pagination state
+            this.userPostsCurrentPage = response.page || page;
+            this.userPostsTotalPages = response.total_pages || 1;
+            
             this.renderUserPosts(response.posts);
+            this.renderUserPostsPagination(response);
         } catch (error) {
             console.error('Error loading user posts:', error);
             this.renderUserPostsEmptyState('Failed to load your posts. Please try again later.');
