@@ -123,17 +123,17 @@ async def create_post(
     if len(post.title) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Title must be less than 100 characters",
+            detail="Title must be less than or equal to 100 characters",
         )
     if len(post.tagline) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Tagline must be less than 100 characters",
+            detail="Tagline must be less than or equal to 100 characters",
         )
     if len(post.slug) > 100:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Slug must be less than 100 characters",
+            detail="Slug must be less than or equal to 100 characters",
         )
     db_post = await PostRepository.create_post(
         post, current_user.id, current_user.name, post.is_published
