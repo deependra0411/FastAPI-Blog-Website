@@ -10,5 +10,9 @@ const CONFIG = {
         github: 'https://github.com/'
     },
     TOAST_DURATION: 5000,
-    POST_TITLE_MAX_LENGTH: 25
+    POST_TITLE_MAX_LENGTH: 25,
+    // Form validation limits
+    TITLE_MAX_LENGTH: 100,
+    TAGLINE_MAX_LENGTH: 100,
+    SLUG_MAX_LENGTH: 100
 };

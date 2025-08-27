@@ -627,12 +627,19 @@
                     type="text"
                     class="form-control"
                     id="postTitle"
+                    maxlength="100"
                     required
                   />
+                  <div class="form-text text-end">
+                    <span id="titleCounter">0/100</span>
+                  </div>
                 </div>
                 <div class="mb-3">
                   <label for="postTagline" class="form-label">Tagline</label>
-                  <input type="text" class="form-control" id="postTagline" />
+                  <input type="text" class="form-control" id="postTagline" maxlength="100" />
+                  <div class="form-text text-end">
+                    <span id="taglineCounter">0/100</span>
+                  </div>
                 </div>
                 <div class="mb-3">
                   <label for="postSlug" class="form-label">Slug</label>
@@ -640,8 +647,12 @@
                     type="text"
                     class="form-control"
                     id="postSlug"
+                    maxlength="100"
                     required
                   />
+                  <div class="form-text text-end">
+                    <span id="slugCounter">0/100</span>
+                  </div>
                 </div>
                 <div class="mb-3">
                   <label for="postContent" class="form-label">Content</label>

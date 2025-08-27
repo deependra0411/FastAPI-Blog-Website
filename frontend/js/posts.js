@@ -377,8 +377,38 @@ class PostsManager {
             this.updatePublishToggleLabel(true);
         }
 
+        // Initialize character counters after setting values
+        setTimeout(() => {
+            this.updateAllCounters();
+        }, 100);
+
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
+    }
+
+    // Update all character counters
+    updateAllCounters() {
+        const updateCounter = (inputId, counterId, maxLength) => {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            if (counter && input) {
+                const currentLength = input.value.length;
+                counter.textContent = `${currentLength}/${maxLength}`;
+                
+                // Add visual warning when approaching limit
+                if (currentLength > maxLength * 0.9) {
+                    counter.className = 'text-warning';
+                } else if (currentLength === maxLength) {
+                    counter.className = 'text-danger';
+                } else {
+                    counter.className = 'text-muted';
+                }
+            }
+        };
+
+        updateCounter('postTitle', 'titleCounter', 100);
+        updateCounter('postTagline', 'taglineCounter', 100);
+        updateCounter('postSlug', 'slugCounter', 100);
     }
 
     // Save post (create or update)
@@ -406,6 +436,26 @@ class PostsManager {
         // Validation
         if (!title || !slug || !content) {
             showToast('Error', 'Please fill in all required fields', 'error');
+            return;
+        }
+
+        // Length validation using config constants
+        const titleMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.TITLE_MAX_LENGTH) ? CONFIG.TITLE_MAX_LENGTH : 100;
+        const taglineMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.TAGLINE_MAX_LENGTH) ? CONFIG.TAGLINE_MAX_LENGTH : 100;
+        const slugMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.SLUG_MAX_LENGTH) ? CONFIG.SLUG_MAX_LENGTH : 100;
+
+        if (title.length > titleMaxLength) {
+            showToast('Error', `Title must not exceed ${titleMaxLength} characters`, 'error');
+            return;
+        }
+
+        if (tagline && tagline.length > taglineMaxLength) {
+            showToast('Error', `Tagline must not exceed ${taglineMaxLength} characters`, 'error');
+            return;
+        }
+
+        if (slug.length > slugMaxLength) {
+            showToast('Error', `Slug must not exceed ${slugMaxLength} characters`, 'error');
             return;
         }
 
@@ -578,12 +628,47 @@ function savePost() {
 document.addEventListener('DOMContentLoaded', function () {
     const titleInput = document.getElementById('postTitle');
     const slugInput = document.getElementById('postSlug');
+    const taglineInput = document.getElementById('postTagline');
 
-    if (titleInput && slugInput) {
+    // Character counters
+    function updateCounter(input, counterId, maxLength) {
+        const counter = document.getElementById(counterId);
+        if (counter && input) {
+            const currentLength = input.value.length;
+            counter.textContent = `${currentLength}/${maxLength}`;
+            
+            // Add visual warning when approaching limit
+            if (currentLength > maxLength * 0.9) {
+                counter.className = 'text-warning';
+            } else if (currentLength === maxLength) {
+                counter.className = 'text-danger';
+            } else {
+                counter.className = 'text-muted';
+            }
+        }
+    }
+
+    if (titleInput) {
         titleInput.addEventListener('input', function () {
+            // Auto-generate slug
             if (!slugInput.value || postsManager.currentEditingPost === null) {
                 slugInput.value = slugify(this.value);
+                updateCounter(slugInput, 'slugCounter', 100);
             }
+            // Update title counter
+            updateCounter(this, 'titleCounter', 100);
+        });
+    }
+
+    if (taglineInput) {
+        taglineInput.addEventListener('input', function () {
+            updateCounter(this, 'taglineCounter', 100);
+        });
+    }
+
+    if (slugInput) {
+        slugInput.addEventListener('input', function () {
+            updateCounter(this, 'slugCounter', 100);
         });
     }
 
