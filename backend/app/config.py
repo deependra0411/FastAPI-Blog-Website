@@ -29,7 +29,11 @@ class Settings(BaseSettings):
     github_url: str = "https://github.com/"
 
     # CORS settings
-    cors_origins: list = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    cors_origins: list = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8080",
+    ]
 
     # API settings
     api_prefix: str = "/api/v1"

@@ -10,24 +10,18 @@ class AuthManager {
     async initializeAuth() {
         // Check if we have a stored token
         const token = sessionStorage.getItem('access_token');
-        console.log('Init auth - token found:', !!token);
-        
         if (!token) {
-            console.log('No token found, setting unauthenticated state');
             this.currentUser = null;
             this.updateUIForUnauthenticatedUser();
             return;
         }
         
         try {
-            console.log('Token found, verifying with /me endpoint');
             // Verify token by calling the /me endpoint
             const userData = await api.getCurrentUser();
-            console.log('Token valid, user data:', userData);
             this.currentUser = userData;
             this.updateUIForAuthenticatedUser();
         } catch (error) {
-            console.log('Token verification failed:', error);
             // Token is invalid, clear it
             sessionStorage.removeItem('access_token');
             this.currentUser = null;

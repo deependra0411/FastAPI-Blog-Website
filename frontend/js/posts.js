@@ -197,39 +197,35 @@ class PostsManager {
         const paginationContainer = document.getElementById('userPostsPagination');
         if (!paginationContainer) return;
 
-        let paginationHTML = '';
-
-        // Previous button
-        if (response.page > 1) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
-                    <i class="fas fa-arrow-left"></i> Previous Posts
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
-
-        // Page info
-        paginationHTML += `
-            <span class="pagination-info">
-                Page ${response.page} of ${response.total_pages} 
-                (${response.total} total posts)
-            </span>
+        paginationContainer.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <!-- Previous Button (Left) -->
+                <div>
+                    ${response.page > 1 ? `
+                        <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
+                            <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
+                        </button>
+                    ` : '<div></div>'}
+                </div>
+                
+                <!-- Page Info (Center) -->
+                <div class="text-center">
+                    <span class="text-muted">
+                        Page ${response.page} of ${response.total_pages} 
+                        <small>(${response.total} total posts)</small>
+                    </span>
+                </div>
+                
+                <!-- Next Button (Right) -->
+                <div>
+                    ${response.page < response.total_pages ? `
+                        <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
+                            NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    ` : '<div></div>'}
+                </div>
+            </div>
         `;
-
-        // Next button
-        if (response.page < response.total_pages) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
-                    Next Posts <i class="fas fa-arrow-right"></i>
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
-
-        paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
     }
 
     // Load and display user's posts in dashboard
@@ -267,49 +263,69 @@ class PostsManager {
             return;
         }
 
-        container.innerHTML = posts.map(post => `
-            <div class="card post-card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-2">
-                                <h5 class="card-title mb-0">${this.escapeHtml(post.title)}</h5>
-                                <span class="badge ${post.is_published ? 'bg-success' : 'bg-secondary'} ms-2">
-                                    ${post.is_published ? 'Published' : 'Draft'}
-                                </span>
-                            </div>
-                            <p class="card-text text-muted">${this.escapeHtml(post.tagline || '')}</p>
-                            <p class="card-text">
-                                <small class="text-muted">
-                                    Created: ${formatDateTime(post.created_at)}
-                                    ${post.updated_at ? `<br>Updated: ${formatDateTime(post.updated_at)}` : ''}
-                                </small>
-                            </p>
+        container.innerHTML = posts.map(post => {
+            // Truncate title if longer than 20 characters
+            const truncatedTitle = post.title.length > CONFIG.POST_TITLE_MAX_LENGTH ? 
+                post.title.substring(0, CONFIG.POST_TITLE_MAX_LENGTH) + '...' : 
+                post.title;
+            
+            return `
+            <div class="card mb-4 border shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <!-- Title and Status Column -->
+                        <div class="col-lg-4 col-md-5 mb-3 mb-md-0">
+                            <h5 class="card-title mb-1" title="${this.escapeHtml(post.title)}">
+                                ${this.escapeHtml(truncatedTitle)}
+                            </h5>
+                            <span class="badge ${post.is_published ? 'bg-success' : 'bg-secondary'}">
+                                ${post.is_published ? 'Published' : 'Draft'}
+                            </span>
+                            ${post.tagline ? `<p class="text-muted small mb-0 mt-1">${this.escapeHtml(post.tagline)}</p>` : ''}
                         </div>
-                                                 <div class="post-actions">
-                             <button class="btn btn-sm btn-outline-primary" onclick="app.showPostDetail('${post.slug}')">
-                                 <i class="fas fa-eye"></i> View
-                             </button>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="postsManager.editPost(${post.id})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <div class="form-check form-switch d-inline-block me-2">
-                                <input class="form-check-input" type="checkbox" id="toggle-${post.id}" 
-                                       ${post.is_published ? 'checked' : ''} 
-                                       onchange="postsManager.toggleVisibility(${post.id})"
-                                       title="${post.is_published ? 'Click to unpublish' : 'Click to publish'}">
-                                <label class="form-check-label" for="toggle-${post.id}">
-                                    <small>${post.is_published ? 'Published' : 'Draft'}</small>
-                                </label>
+                        
+                        <!-- Dates Column -->
+                        <div class="col-lg-3 col-md-3 mb-3 mb-md-0">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Created: ${formatDate(post.created_at)}
+                            </small>
+                            ${post.updated_at ? `
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    Updated: ${formatDate(post.updated_at)}
+                                </small>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Actions Column -->
+                        <div class="col-lg-5 col-md-4">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="app.showPostDetail('${post.slug}')">
+                                    <i class="fas fa-eye"></i> VIEW
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="postsManager.editPost(${post.id})">
+                                    <i class="fas fa-edit"></i> EDIT
+                                </button>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="toggle-${post.id}" 
+                                           ${post.is_published ? 'checked' : ''} 
+                                           onchange="postsManager.toggleVisibility(${post.id})"
+                                           title="${post.is_published ? 'Click to unpublish' : 'Click to publish'}">
+                                    <label class="form-check-label" for="toggle-${post.id}">
+                                        <small>${post.is_published ? 'Pub' : 'Draft'}</small>
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" onclick="postsManager.deletePost(${post.id}, '${this.escapeHtml(post.title)}')">
+                                    <i class="fas fa-trash"></i> DELETE
+                                </button>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger" onclick="postsManager.deletePost(${post.id}, '${this.escapeHtml(post.title)}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
 

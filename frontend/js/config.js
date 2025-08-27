@@ -9,5 +9,6 @@ const CONFIG = {
         facebook: 'https://www.facebook.com/',
         github: 'https://github.com/'
     },
-    TOAST_DURATION: 5000
+    TOAST_DURATION: 5000,
+    POST_TITLE_MAX_LENGTH: 25
 };

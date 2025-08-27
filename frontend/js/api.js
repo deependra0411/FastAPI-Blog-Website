@@ -12,10 +12,8 @@ class ApiClient {
         
         // Add Authorization header if token exists
         const token = sessionStorage.getItem('access_token');
-        console.log('getHeaders - token from sessionStorage:', token ? 'found' : 'not found');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
-            console.log('Authorization header set');
         }
         
         return headers;
@@ -65,16 +63,7 @@ class ApiClient {
             config.credentials = 'include';
         }
         
-        // Debug logging (only for auth issues)
-        if (needsCreds || endpoint.includes('/auth/') || endpoint.includes('/user/')) {
-            console.log(`API Request: ${method} ${endpoint}`, {
-                needsCredentials: needsCreds,
-                hasCredentials: !!config.credentials,
-                hasAuthHeader: !!config.headers['Authorization'],
-                authHeader: config.headers['Authorization'] ? 'Bearer ***' : 'none',
-                endpoint: endpoint
-            });
-        }
+
 
         try {
             showLoadingSpinner(true);
