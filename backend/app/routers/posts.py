@@ -107,7 +107,7 @@ async def update_post(
     return PostResponse(**updated_post.model_dump())
 
 
-@router.delete("/{post_id}")
+@router.delete("/delete/{post_id}")
 async def delete_post(
     post_id: int,
     current_user: UserInDB = Depends(get_current_active_user),

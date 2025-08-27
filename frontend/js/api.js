@@ -112,7 +112,7 @@ class ApiClient {
     }
 
     async deletePost(postId) {
-        return this.delete(`/posts/${postId}`);
+        return this.delete(`/posts/delete/${postId}`);
     }
 
     async getUserPosts(page = 1, perPage = 10) {
