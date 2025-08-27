@@ -145,7 +145,7 @@ async def get_user_posts(
 ):
     """Get current user's posts"""
     posts, total = await PostRepository.get_posts_by_author(
-        current_user.id, page, per_page
+        author_id=current_user.id, page=page, per_page=per_page
     )
     total_pages = ceil(total / per_page)
 

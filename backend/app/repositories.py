@@ -186,13 +186,19 @@ class PostRepository:
 
     @staticmethod
     async def get_posts_by_author(
-        author_id: int, is_published: bool, page: int = 1, per_page: int = 10
+        author_id: int,
+        is_published: Optional[bool] = None,
+        page: int = 1,
+        per_page: int = 10,
     ) -> tuple[List[PostInDB], int]:
         """Get posts by author with pagination"""
         offset = (page - 1) * per_page
-
+        if is_published is None:
+            is_published = [True, False]
+        else:
+            is_published = [is_published]
         # Count total posts by author
-        count_query = "SELECT COUNT(*) as total FROM posts WHERE author_id = :author_id and is_published = :is_published"
+        count_query = "SELECT COUNT(*) as total FROM posts WHERE author_id = :author_id and is_published = ANY(:is_published)"
         count_result = await db_manager.execute_one(
             count_query, {"author_id": author_id, "is_published": is_published}
         )
@@ -201,7 +207,7 @@ class PostRepository:
         # Get posts
         query = """
             SELECT * FROM posts
-            WHERE author_id = :author_id and is_published = :is_published
+            WHERE author_id = :author_id and is_published = ANY(:is_published)
             ORDER BY created_at DESC
             LIMIT :limit OFFSET :offset
         """
