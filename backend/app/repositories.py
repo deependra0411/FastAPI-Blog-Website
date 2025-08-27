@@ -173,7 +173,7 @@ class PostRepository:
     @staticmethod
     async def get_post_by_slug(slug: str) -> Optional[PostInDB]:
         """Get post by slug"""
-        query = "SELECT * FROM posts WHERE slug = :slug AND is_published = true"
+        query = "SELECT * FROM posts WHERE slug = :slug"
         result = await db_manager.execute_one(query, {"slug": slug})
         return PostInDB(**result) if result else None
 
