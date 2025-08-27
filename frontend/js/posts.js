@@ -6,6 +6,51 @@ class PostsManager {
         this.userPostsCurrentPage = 1;
         this.userPostsTotalPages = 1;
         this.currentEditingPost = null;
+        this.quillEditor = null;
+        this.initializeQuillEditor();
+    }
+
+    // Initialize Quill editor
+    initializeQuillEditor() {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupQuillEditor());
+        } else {
+            this.setupQuillEditor();
+        }
+    }
+
+    // Setup Quill editor with configuration
+    setupQuillEditor() {
+        const editorContainer = document.getElementById('postContent');
+        if (!editorContainer) return;
+
+        // Quill configuration
+        this.quillEditor = new Quill('#postContent', {
+            theme: 'snow',
+            placeholder: 'Write your post content here...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Update hidden input when content changes
+        this.quillEditor.on('text-change', () => {
+            const htmlContent = this.quillEditor.root.innerHTML;
+            const hiddenInput = document.getElementById('postContentHidden');
+            if (hiddenInput) {
+                hiddenInput.value = htmlContent;
+            }
+        });
     }
 
     // Load and display posts for home page
@@ -257,6 +302,11 @@ class PostsManager {
         form.reset();
         this.currentEditingPost = postData;
         
+        // Clear Quill editor
+        if (this.quillEditor) {
+            this.quillEditor.setText('');
+        }
+        
         if (postData) {
             // Editing existing post
             title.textContent = 'Edit Post';
@@ -265,8 +315,14 @@ class PostsManager {
             document.getElementById('postTagline').value = postData.tagline || '';
             document.getElementById('postSlug').value = postData.slug;
             document.getElementById('postImage').value = postData.img_file || '';
-            document.getElementById('postContent').value = postData.content;
             document.getElementById('postPublished').checked = postData.is_published;
+            
+            // Set Quill content
+            if (this.quillEditor && postData.content) {
+                this.quillEditor.root.innerHTML = postData.content;
+                // Update hidden input
+                document.getElementById('postContentHidden').value = postData.content;
+            }
             
             // Update toggle label based on current status
             this.updatePublishToggleLabel(postData.is_published);
@@ -275,6 +331,7 @@ class PostsManager {
             title.textContent = 'Create New Post';
             document.getElementById('postId').value = '';
             document.getElementById('postPublished').checked = true; // Default to published for new posts
+            document.getElementById('postContentHidden').value = '';
             this.updatePublishToggleLabel(true);
         }
         
@@ -288,7 +345,20 @@ class PostsManager {
         const tagline = document.getElementById('postTagline').value.trim();
         const slug = document.getElementById('postSlug').value.trim();
         const imgFile = document.getElementById('postImage').value.trim();
-        const content = document.getElementById('postContent').value.trim();
+        
+        // Get content from Quill editor
+        let content = '';
+        if (this.quillEditor) {
+            content = this.quillEditor.root.innerHTML.trim();
+            // Remove empty paragraph tags that Quill adds by default
+            if (content === '<p><br></p>') {
+                content = '';
+            }
+        } else {
+            // Fallback to hidden input
+            content = document.getElementById('postContentHidden').value.trim();
+        }
+        
         const isPublished = document.getElementById('postPublished').checked;
         const postId = document.getElementById('postId').value;
         
