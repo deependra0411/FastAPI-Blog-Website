@@ -135,21 +135,21 @@ class PostsManager {
             return;
         }
 
-        container.innerHTML = posts.map(post => `
-            <div class="post-preview fade-in">
-                <a href="#" onclick="showPostDetail('${post.slug}')">
-                    <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
-                    <h3 class="post-subtitle">${this.escapeHtml(post.tagline || '')}</h3>
-                </a>
-                <p class="post-meta">
-                    Posted by <strong>${this.escapeHtml(post.author_name)}</strong>
-                    on ${formatDate(post.created_at)}
-                </p>
-                ${post.img_file ? `<img src="${post.img_file}" alt="${this.escapeHtml(post.title)}" class="img-fluid mb-3" style="max-height: 200px; object-fit: cover;">` : ''}
-                <p class="post-excerpt">${truncateText(this.stripHtml(post.content))}</p>
-            </div>
-            <hr class="my-4" />
-        `).join('');
+                 container.innerHTML = posts.map(post => `
+             <div class="post-preview fade-in">
+                 <a href="#post/${post.slug}" onclick="app.showPostDetail('${post.slug}'); return false;">
+                     <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
+                     <h3 class="post-subtitle">${this.escapeHtml(post.tagline || '')}</h3>
+                 </a>
+                 <p class="post-meta">
+                     Posted by <strong>${this.escapeHtml(post.author_name)}</strong>
+                     on ${formatDate(post.created_at)}
+                 </p>
+                 ${post.img_file ? `<img src="${post.img_file}" alt="${this.escapeHtml(post.title)}" class="img-fluid mb-3" style="max-height: 200px; object-fit: cover;">` : ''}
+                 <p class="post-excerpt">${truncateText(this.stripHtml(post.content))}</p>
+             </div>
+             <hr class="my-4" />
+         `).join('');
     }
 
     // Render pagination
@@ -286,10 +286,10 @@ class PostsManager {
                                 </small>
                             </p>
                         </div>
-                        <div class="post-actions">
-                            <button class="btn btn-sm btn-outline-primary" onclick="showPostDetail('${post.slug}')">
-                                <i class="fas fa-eye"></i> View
-                            </button>
+                                                 <div class="post-actions">
+                             <button class="btn btn-sm btn-outline-primary" onclick="app.showPostDetail('${post.slug}')">
+                                 <i class="fas fa-eye"></i> View
+                             </button>
                             <button class="btn btn-sm btn-outline-secondary" onclick="postsManager.editPost(${post.id})">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
@@ -312,37 +312,7 @@ class PostsManager {
         `).join('');
     }
 
-    // Show post detail modal
-    async showPostDetail(slug) {
-        try {
-            const post = await api.getPost(slug);
-            
-            const modal = document.getElementById('postDetailModal');
-            const title = document.getElementById('postDetailTitle');
-            const content = document.getElementById('postDetailContent');
-            
-            if (title) title.textContent = post.title;
-            if (content) {
-                content.innerHTML = `
-                    ${post.tagline ? `<p class="lead text-muted">${this.escapeHtml(post.tagline)}</p>` : ''}
-                    <p class="text-muted mb-4">
-                        <small>
-                            By <strong>${this.escapeHtml(post.author_name)}</strong> 
-                            on ${formatDate(post.created_at)}
-                        </small>
-                    </p>
-                    ${post.img_file ? `<img src="${post.img_file}" alt="${this.escapeHtml(post.title)}" class="img-fluid mb-4">` : ''}
-                    <div class="post-content">${post.content}</div>
-                `;
-            }
-            
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-        } catch (error) {
-            console.error('Error loading post:', error);
-            showToast('Error', 'Failed to load post details', 'error');
-        }
-    }
+
 
     // Show post editor modal
     showPostEditor(postData = null) {
@@ -580,10 +550,6 @@ class PostsManager {
 const postsManager = new PostsManager();
 
 // Global functions for inline event handlers
-function showPostDetail(slug) {
-    postsManager.showPostDetail(slug);
-}
-
 function showPostEditor(postData = null) {
     postsManager.showPostEditor(postData);
 }

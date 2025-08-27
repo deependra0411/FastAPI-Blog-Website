@@ -1,513 +1,815 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Python Coders - Start Learning Today</title>
-    
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800"
+      rel="stylesheet"
+    />
+
     <!-- Quill Editor CSS -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
+
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-        <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" href="#" onclick="showPage('home')">Python Coders</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ms-auto py-4 py-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('home')">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('about')">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('contact')">Contact</a>
-                    </li>
-                    <li class="nav-item" id="authNav">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('login')">Login</a>
-                    </li>
-                    <li class="nav-item d-none" id="dashboardNav">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('dashboard')">Dashboard</a>
-                    </li>
-                    <li class="nav-item d-none" id="profileNav">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="showPage('profile')">Profile</a>
-                    </li>
-                    <li class="nav-item d-none" id="logoutNav">
-                        <a class="nav-link px-lg-3 py-3 py-lg-4" href="#" onclick="logout()">Logout</a>
-                    </li>
-                </ul>
-            </div>
+      <div class="container px-4 px-lg-5">
+        <a
+          class="navbar-brand"
+          href="#"
+          onclick="showPage('home'); return false;"
+          >Python Coders</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarResponsive"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ms-auto py-4 py-lg-0">
+            <li class="nav-item">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('home'); return false;"
+                >Home</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('about'); return false;"
+                >About</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('contact'); return false;"
+                >Contact</a
+              >
+            </li>
+            <li class="nav-item" id="authNav">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('login'); return false;"
+                >Login</a
+              >
+            </li>
+            <li class="nav-item d-none" id="dashboardNav">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('dashboard'); return false;"
+                >Dashboard</a
+              >
+            </li>
+            <li class="nav-item d-none" id="profileNav">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="showPage('profile'); return false;"
+                >Profile</a
+              >
+            </li>
+            <li class="nav-item d-none" id="logoutNav">
+              <a
+                class="nav-link px-lg-3 py-3 py-lg-4"
+                href="#"
+                onclick="logout()"
+                >Logout</a
+              >
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
 
     <!-- Main Content -->
     <main id="mainContent">
-        <!-- Home Page -->
-        <div id="homePage" class="page">
-            <!-- Header -->
-            <header class="masthead" style="background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtm5MJ8yHMEUE7LnkxjdAXuqSItA3a9JlvMQ&s')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="site-heading">
-                                <h1>Python Coders</h1>
-                                <span class="subheading">Start Learning Today</span>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Home Page -->
+      <div id="homePage" class="page">
+        <!-- Header -->
+        <header
+          class="masthead"
+          style="
+            background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtm5MJ8yHMEUE7LnkxjdAXuqSItA3a9JlvMQ&s');
+          "
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                  <h1>Python Coders</h1>
+                  <span class="subheading">Start Learning Today</span>
                 </div>
-            </header>
-
-            <!-- Posts Container -->
-            <div class="container px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                        <div id="postsContainer">
-                            <!-- Posts will be loaded here -->
-                        </div>
-                        
-                        <!-- Pagination -->
-                        <div id="pagination" class="d-flex justify-content-between">
-                            <!-- Pagination buttons will be added here -->
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
-        </div>
+          </div>
+        </header>
 
-        <!-- About Page -->
-        <div id="aboutPage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/about-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>About Me</h1>
-                                <span class="subheading">This is what I do.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <article class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <p>Welcome to Python Coders, your go-to destination for learning Python programming and web development. Our blog is dedicated to helping developers of all levels master the art of coding.</p>
-                            <p>Whether you're a beginner taking your first steps into programming or an experienced developer looking to sharpen your skills, we provide comprehensive tutorials, practical examples, and industry insights.</p>
-                            <p>Our mission is to make coding accessible and enjoyable for everyone. Join our community and start your coding journey today!</p>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </div>
+        <!-- Posts Container -->
+        <div class="container px-4 px-lg-5">
+          <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+              <div id="postsContainer">
+                <!-- Posts will be loaded here -->
+              </div>
 
-        <!-- Contact Page -->
-        <div id="contactPage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/contact-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>Contact Me</h1>
-                                <span class="subheading">Have questions? I have answers.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <p>Want to get in touch? Fill out the form below to send me a message and I will get back to you as soon as possible!</p>
-                            <div class="my-5">
-                                <form id="contactForm">
-                                    <div class="form-floating mb-3">
-                                        <input class="form-control" id="name" type="text" placeholder="Enter your name..." required />
-                                        <label for="name">Name</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input class="form-control" id="email" type="email" placeholder="Enter your email..." required />
-                                        <label for="email">Email address</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input class="form-control" id="phone" type="tel" placeholder="Enter your phone number..." />
-                                        <label for="phone">Phone Number</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <textarea class="form-control" id="message" placeholder="Enter your message here..." style="height: 12rem" required></textarea>
-                                        <label for="message">Message</label>
-                                    </div>
-                                    <button class="btn btn-primary text-uppercase" type="submit">Send</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Login Page -->
-        <div id="loginPage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/login-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>Login</h1>
-                                <span class="subheading">Welcome back!</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-6 col-lg-5 col-xl-4">
-                            <div class="card shadow">
-                                <div class="card-body p-4">
-                                    <h3 class="card-title text-center mb-4">Sign In</h3>
-                                    <form id="loginForm">
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="loginEmail" type="email" placeholder="name@example.com" required />
-                                            <label for="loginEmail">Email address</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="loginPassword" type="password" placeholder="Password" required />
-                                            <label for="loginPassword">Password</label>
-                                        </div>
-                                        <button class="btn btn-primary w-100 mb-3" type="submit">Sign In</button>
-                                    </form>
-                                    <div class="text-center">
-                                        <p class="mb-0">Don't have an account? <a href="#" onclick="showPage('register')">Sign up</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Register Page -->
-        <div id="registerPage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/register-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>Register</h1>
-                                <span class="subheading">Join our community!</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-6 col-lg-5 col-xl-4">
-                            <div class="card shadow">
-                                <div class="card-body p-4">
-                                    <h3 class="card-title text-center mb-4">Create Account</h3>
-                                    <form id="registerForm">
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="registerName" type="text" placeholder="Full Name" required />
-                                            <label for="registerName">Full Name</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="registerEmail" type="email" placeholder="name@example.com" required />
-                                            <label for="registerEmail">Email address</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="registerPassword" type="password" placeholder="Password" required />
-                                            <label for="registerPassword">Password</label>
-                                        </div>
-                                        <button class="btn btn-primary w-100 mb-3" type="submit">Create Account</button>
-                                    </form>
-                                    <div class="text-center">
-                                        <p class="mb-0">Already have an account? <a href="#" onclick="showPage('login')">Sign in</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Dashboard Page -->
-        <div id="dashboardPage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/dashboard-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>Dashboard</h1>
-                                <span class="subheading" id="userWelcome">Welcome back!</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2>My Posts</h2>
-                                <div>
-                                    <div class="form-check form-switch d-inline-block me-3">
-                                        <input class="form-check-input" type="checkbox" id="showUnpublished">
-                                        <label class="form-check-label" for="showUnpublished">
-                                            Show unpublished
-                                        </label>
-                                    </div>
-                                    <button class="btn btn-primary" onclick="showPostEditor()">
-                                        <i class="fas fa-plus"></i> New Post
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="userPostsContainer">
-                                <!-- User posts will be loaded here -->
-                            </div>
-                            
-                            <!-- User Posts Pagination -->
-                            <div id="userPostsPagination" class="d-flex justify-content-between mt-4">
-                                <!-- Pagination buttons will be added here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Profile Page -->
-        <div id="profilePage" class="page d-none">
-            <header class="masthead" style="background-image: url('images/profile-bg.jpg')">
-                <div class="container position-relative px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-10 col-lg-8 col-xl-7">
-                            <div class="page-heading">
-                                <h1>Profile</h1>
-                                <span class="subheading">Manage your account</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <main class="mb-4">
-                <div class="container px-4 px-lg-5">
-                    <div class="row gx-4 gx-lg-5 justify-content-center">
-                        <div class="col-md-6 col-lg-5 col-xl-4">
-                            <div class="card shadow">
-                                <div class="card-body p-4">
-                                    <h3 class="card-title text-center mb-4">Update Profile</h3>
-                                    <form id="profileForm">
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="profileName" type="text" placeholder="Full Name" required />
-                                            <label for="profileName">Full Name</label>
-                                        </div>
-                                        <div class="form-floating mb-3">
-                                            <input class="form-control" id="profileEmail" type="email" placeholder="name@example.com" required />
-                                            <label for="profileEmail">Email address</label>
-                                        </div>
-                                        <div class="mb-3 text-center">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                                                <i class="fas fa-key me-1"></i> Change Password
-                                            </button>
-                                        </div>
-                                        <button class="btn btn-primary w-100 mb-3" type="submit">Update Profile</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-
-        <!-- Post Editor Modal -->
-        <div class="modal fade" id="postEditorModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="postEditorTitle">Create New Post</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="postForm">
-                            <input type="hidden" id="postId" />
-                            <div class="mb-3">
-                                <label for="postTitle" class="form-label">Title</label>
-                                <input type="text" class="form-control" id="postTitle" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="postTagline" class="form-label">Tagline</label>
-                                <input type="text" class="form-control" id="postTagline" />
-                            </div>
-                            <div class="mb-3">
-                                <label for="postSlug" class="form-label">Slug</label>
-                                <input type="text" class="form-control" id="postSlug" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="postContent" class="form-label">Content</label>
-                                <div id="postContent" style="height: 300px;"></div>
-                                <input type="hidden" id="postContentHidden" required>
-                            </div>
-                            <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="postPublished" checked>
-                                    <label class="form-check-label" for="postPublished">
-                                        <i class="fas fa-eye me-1"></i> Publish immediately
-                                    </label>
-                                </div>
-                                <small class="form-text text-muted">
-                                    Uncheck to save as draft. You can publish it later from your dashboard.
-                                </small>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" onclick="savePost()">Save Post</button>
-                    </div>
-                </div>
+              <!-- Pagination -->
+              <div id="pagination" class="d-flex justify-content-between">
+                <!-- Pagination buttons will be added here -->
+              </div>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- Post Detail Modal -->
-        <div class="modal fade" id="postDetailModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="postDetailTitle"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="postDetailContent"></div>
-                    </div>
+      <!-- About Page -->
+      <div id="aboutPage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/about-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>About Me</h1>
+                  <span class="subheading">This is what I do.</span>
                 </div>
+              </div>
             </div>
+          </div>
+        </header>
+
+        <article class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <p>
+                  Welcome to Python Coders, your go-to destination for learning
+                  Python programming and web development. Our blog is dedicated
+                  to helping developers of all levels master the art of coding.
+                </p>
+                <p>
+                  Whether you're a beginner taking your first steps into
+                  programming or an experienced developer looking to sharpen
+                  your skills, we provide comprehensive tutorials, practical
+                  examples, and industry insights.
+                </p>
+                <p>
+                  Our mission is to make coding accessible and enjoyable for
+                  everyone. Join our community and start your coding journey
+                  today!
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Post Detail Page -->
+      <div id="postDetailPage" class="page d-none">
+        <article class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <!-- Post content will be loaded here -->
+                <div id="postDetailContent">
+                  <!-- Loading state -->
+                  <div class="text-center py-5">
+                    <div class="spinner-border" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Back button -->
+                <div
+                  class="d-flex justify-content-between align-items-center mt-4 pt-4 border-top"
+                >
+                  <button
+                    class="btn btn-outline-primary"
+                    onclick="showPage('home'); return false;"
+                  >
+                    <i class="fas fa-arrow-left"></i> Back to Posts
+                  </button>
+                  <div id="postDetailActions">
+                    <!-- Edit/Delete buttons for post owner -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Contact Page -->
+      <div id="contactPage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/contact-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>Contact Me</h1>
+                  <span class="subheading"
+                    >Have questions? I have answers.</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <p>
+                  Want to get in touch? Fill out the form below to send me a
+                  message and I will get back to you as soon as possible!
+                </p>
+                <div class="my-5">
+                  <form id="contactForm">
+                    <div class="form-floating mb-3">
+                      <input
+                        class="form-control"
+                        id="name"
+                        type="text"
+                        placeholder="Enter your name..."
+                        required
+                      />
+                      <label for="name">Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input
+                        class="form-control"
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email..."
+                        required
+                      />
+                      <label for="email">Email address</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input
+                        class="form-control"
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number..."
+                      />
+                      <label for="phone">Phone Number</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <textarea
+                        class="form-control"
+                        id="message"
+                        placeholder="Enter your message here..."
+                        style="height: 12rem"
+                        required
+                      ></textarea>
+                      <label for="message">Message</label>
+                    </div>
+                    <button
+                      class="btn btn-primary text-uppercase"
+                      type="submit"
+                    >
+                      Send
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Login Page -->
+      <div id="loginPage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/login-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>Login</h1>
+                  <span class="subheading">Welcome back!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="card shadow">
+                  <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">Sign In</h3>
+                    <form id="loginForm">
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="loginEmail"
+                          type="email"
+                          placeholder="name@example.com"
+                          required
+                        />
+                        <label for="loginEmail">Email address</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="loginPassword"
+                          type="password"
+                          placeholder="Password"
+                          required
+                        />
+                        <label for="loginPassword">Password</label>
+                      </div>
+                      <button class="btn btn-primary w-100 mb-3" type="submit">
+                        Sign In
+                      </button>
+                    </form>
+                    <div class="text-center">
+                      <p class="mb-0">
+                        Don't have an account?
+                        <a
+                          href="#"
+                          onclick="showPage('register'); return false;"
+                          >Sign up</a
+                        >
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Register Page -->
+      <div id="registerPage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/register-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>Register</h1>
+                  <span class="subheading">Join our community!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="card shadow">
+                  <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">Create Account</h3>
+                    <form id="registerForm">
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="registerName"
+                          type="text"
+                          placeholder="Full Name"
+                          required
+                        />
+                        <label for="registerName">Full Name</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="registerEmail"
+                          type="email"
+                          placeholder="name@example.com"
+                          required
+                        />
+                        <label for="registerEmail">Email address</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="registerPassword"
+                          type="password"
+                          placeholder="Password"
+                          required
+                        />
+                        <label for="registerPassword">Password</label>
+                      </div>
+                      <button class="btn btn-primary w-100 mb-3" type="submit">
+                        Create Account
+                      </button>
+                    </form>
+                    <div class="text-center">
+                      <p class="mb-0">
+                        Already have an account?
+                        <a href="#" onclick="showPage('login'); return false;"
+                          >Sign in</a
+                        >
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Dashboard Page -->
+      <div id="dashboardPage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/dashboard-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>Dashboard</h1>
+                  <span class="subheading" id="userWelcome">Welcome back!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-4"
+                >
+                  <h2>My Posts</h2>
+                  <div>
+                    <div class="form-check form-switch d-inline-block me-3">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="showUnpublished"
+                      />
+                      <label class="form-check-label" for="showUnpublished">
+                        Show unpublished
+                      </label>
+                    </div>
+                    <button class="btn btn-primary" onclick="showPostEditor()">
+                      <i class="fas fa-plus"></i> New Post
+                    </button>
+                  </div>
+                </div>
+                <div id="userPostsContainer">
+                  <!-- User posts will be loaded here -->
+                </div>
+
+                <!-- User Posts Pagination -->
+                <div
+                  id="userPostsPagination"
+                  class="d-flex justify-content-between mt-4"
+                >
+                  <!-- Pagination buttons will be added here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Profile Page -->
+      <div id="profilePage" class="page d-none">
+        <header
+          class="masthead"
+          style="background-image: url('images/profile-bg.jpg')"
+        >
+          <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                  <h1>Profile</h1>
+                  <span class="subheading">Manage your account</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="mb-4">
+          <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+              <div class="col-md-6 col-lg-5 col-xl-4">
+                <div class="card shadow">
+                  <div class="card-body p-4">
+                    <h3 class="card-title text-center mb-4">Update Profile</h3>
+                    <form id="profileForm">
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="profileName"
+                          type="text"
+                          placeholder="Full Name"
+                          required
+                        />
+                        <label for="profileName">Full Name</label>
+                      </div>
+                      <div class="form-floating mb-3">
+                        <input
+                          class="form-control"
+                          id="profileEmail"
+                          type="email"
+                          placeholder="name@example.com"
+                          required
+                        />
+                        <label for="profileEmail">Email address</label>
+                      </div>
+                      <div class="mb-3 text-center">
+                        <button
+                          type="button"
+                          class="btn btn-outline-secondary btn-sm"
+                          data-bs-toggle="modal"
+                          data-bs-target="#changePasswordModal"
+                        >
+                          <i class="fas fa-key me-1"></i> Change Password
+                        </button>
+                      </div>
+                      <button class="btn btn-primary w-100 mb-3" type="submit">
+                        Update Profile
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- Post Editor Modal -->
+      <div class="modal fade" id="postEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="postEditorTitle">Create New Post</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <form id="postForm">
+                <input type="hidden" id="postId" />
+                <div class="mb-3">
+                  <label for="postTitle" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="postTitle"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="postTagline" class="form-label">Tagline</label>
+                  <input type="text" class="form-control" id="postTagline" />
+                </div>
+                <div class="mb-3">
+                  <label for="postSlug" class="form-label">Slug</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="postSlug"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="postContent" class="form-label">Content</label>
+                  <div id="postContent" style="height: 300px"></div>
+                  <input type="hidden" id="postContentHidden" required />
+                </div>
+                <div class="mb-3">
+                  <div class="form-check form-switch">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="postPublished"
+                      checked
+                    />
+                    <label class="form-check-label" for="postPublished">
+                      <i class="fas fa-eye me-1"></i> Publish immediately
+                    </label>
+                  </div>
+                  <small class="form-text text-muted">
+                    Uncheck to save as draft. You can publish it later from your
+                    dashboard.
+                  </small>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="savePost()"
+              >
+                Save Post
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
     </main>
 
     <!-- Change Password Modal -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-key me-2"></i>Change Password
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-key me-2"></i>Change Password
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="changePasswordForm">
+              <div class="form-floating mb-3">
+                <input
+                  class="form-control"
+                  id="currentPasswordModal"
+                  type="password"
+                  placeholder="Current Password"
+                  required
+                />
+                <label for="currentPasswordModal">Current Password</label>
+              </div>
+              <div class="form-floating mb-3">
+                <input
+                  class="form-control"
+                  id="newPasswordModal"
+                  type="password"
+                  placeholder="New Password"
+                  required
+                />
+                <label for="newPasswordModal">New Password</label>
+                <div class="form-text">
+                  Password must be at least 6 characters long.
                 </div>
-                <div class="modal-body">
-                    <form id="changePasswordForm">
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="currentPasswordModal" type="password" placeholder="Current Password" required />
-                            <label for="currentPasswordModal">Current Password</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="newPasswordModal" type="password" placeholder="New Password" required />
-                            <label for="newPasswordModal">New Password</label>
-                            <div class="form-text">Password must be at least 6 characters long.</div>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="confirmPasswordModal" type="password" placeholder="Confirm New Password" required />
-                            <label for="confirmPasswordModal">Confirm New Password</label>
-                            <div id="passwordMatchError" class="form-text text-danger" style="display: none;">
-                                Passwords do not match!
-                            </div>
-                        </div>
-                    </form>
+              </div>
+              <div class="form-floating mb-3">
+                <input
+                  class="form-control"
+                  id="confirmPasswordModal"
+                  type="password"
+                  placeholder="Confirm New Password"
+                  required
+                />
+                <label for="confirmPasswordModal">Confirm New Password</label>
+                <div
+                  id="passwordMatchError"
+                  class="form-text text-danger"
+                  style="display: none"
+                >
+                  Passwords do not match!
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="changePassword()">Change Password</button>
-                </div>
-            </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="changePassword()"
+            >
+              Change Password
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Footer -->
     <footer class="border-top">
-        <div class="container px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-md-10 col-lg-8 col-xl-7">
-                    <ul class="list-inline text-center">
-                        <li class="list-inline-item">
-                            <a href="https://twitter.com/" target="_blank">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="https://www.facebook.com/" target="_blank">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="https://github.com/" target="_blank">
-                                <span class="fa-stack fa-lg">
-                                    <i class="fas fa-circle fa-stack-2x"></i>
-                                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="small text-center text-muted fst-italic">Copyright &copy; Python Coders 2024</div>
-                </div>
+      <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+          <div class="col-md-10 col-lg-8 col-xl-7">
+            <ul class="list-inline text-center">
+              <li class="list-inline-item">
+                <a href="https://twitter.com/" target="_blank">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://www.facebook.com/" target="_blank">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a href="https://github.com/" target="_blank">
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+            </ul>
+            <div class="small text-center text-muted fst-italic">
+              Copyright &copy; Python Coders 2024
             </div>
+          </div>
         </div>
+      </div>
     </footer>
 
     <!-- Loading Spinner -->
     <div id="loadingSpinner" class="d-none">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
     </div>
 
     <!-- Toast Notifications -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <div id="toast" class="toast" role="alert">
-            <div class="toast-header">
-                <strong class="me-auto" id="toastTitle">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body" id="toastMessage"></div>
+      <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+          <strong class="me-auto" id="toastTitle">Notification</strong>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+          ></button>
         </div>
+        <div class="toast-body" id="toastMessage"></div>
+      </div>
     </div>
 
     <!-- Scripts -->
@@ -519,5 +821,5 @@
     <script src="js/auth.js"></script>
     <script src="js/posts.js"></script>
     <script src="js/app.js"></script>
-</body>
+  </body>
 </html>
