@@ -131,6 +131,21 @@ class ApiClient {
     async sendContactMessage(contactData) {
         return this.post('/contact/', contactData);
     }
+
+    // Upload image for posts
+    async uploadImage(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        return this.request('/posts/upload-image', {
+            method: 'POST',
+            body: formData,
+            // Don't set Content-Type, let browser set it with boundary for FormData
+            headers: Object.fromEntries(
+                Object.entries(this.getAuthHeaders()).filter(([key]) => key !== 'Content-Type')
+            )
+        });
+    }
 }
 
 // Create global API client instance

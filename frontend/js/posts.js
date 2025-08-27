@@ -43,6 +43,11 @@ class PostsManager {
             }
         });
 
+        // Custom image handler for file uploads
+        this.quillEditor.getModule('toolbar').addHandler('image', () => {
+            this.handleImageUpload();
+        });
+
         // Update hidden input when content changes
         this.quillEditor.on('text-change', () => {
             const htmlContent = this.quillEditor.root.innerHTML;
@@ -51,6 +56,58 @@ class PostsManager {
                 hiddenInput.value = htmlContent;
             }
         });
+    }
+
+    // Handle image upload for Quill editor
+    async handleImageUpload() {
+        // Create file input
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Validate file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Error', 'Image size too large. Maximum size is 5MB.', 'error');
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showToast('Error', 'Please select an image file.', 'error');
+                return;
+            }
+
+            try {
+                // Show loading
+                showToast('Info', 'Uploading image...', 'info');
+                
+                // Upload the image
+                const response = await api.uploadImage(file);
+                
+                // Get current cursor position in Quill
+                const range = this.quillEditor.getSelection(true);
+                
+                // Insert the image at cursor position
+                // Construct full URL for the image
+                const imageUrl = `${CONFIG.API_BASE_URL.replace('/api/v1', '')}${response.url}`;
+                this.quillEditor.insertEmbed(range.index, 'image', imageUrl);
+                
+                // Move cursor after the image
+                this.quillEditor.setSelection(range.index + 1);
+                
+                showToast('Success', 'Image uploaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                showToast('Error', error.message || 'Failed to upload image', 'error');
+            }
+        };
+
+        // Trigger file selection
+        input.click();
     }
 
     // Load and display posts for home page
@@ -369,14 +426,14 @@ class PostsManager {
         // Auto-generate slug if empty
         const finalSlug = slug || slugify(title);
         
-        const postData = {
-            title,
-            tagline: tagline || null,
-            slug: finalSlug,
-            content,
-            img_file: imgFile || null,
-            is_published: isPublished
-        };
+                 const postData = {
+             title,
+             tagline: tagline || null,
+             slug: finalSlug,
+             content,
+             img_file: null, // Images are now handled via Quill editor
+             is_published: isPublished
+         };
         
         try {
             console.log('Saving post with data:', postData);

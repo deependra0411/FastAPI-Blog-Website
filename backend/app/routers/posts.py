@@ -1,6 +1,10 @@
 from math import ceil
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
+from fastapi.responses import FileResponse
+import os
+import uuid
+from pathlib import Path
 
 from ..auth import get_current_active_user
 from ..config import get_settings
@@ -19,16 +23,10 @@ class SuccessResponse:
 
 
 @router.get("/", response_model=PostListResponse)
-async def get_posts(
-    page: int = Query(1, ge=1),
-    per_page: int = Query(None),
-):
-    """Get paginated list of published posts"""
-    if per_page is None:
-        per_page = settings.no_of_posts_per_page
-
+async def get_posts(page: int = Query(1, ge=1), per_page: int = Query(10, ge=1, le=100)):
+    """Get all published posts with pagination"""
     posts, total = await PostRepository.get_posts_paginated(
-        page, per_page, published_only=True
+        page=page, per_page=per_page, published_only=True
     )
     total_pages = ceil(total / per_page)
 
@@ -39,6 +37,62 @@ async def get_posts(
         per_page=per_page,
         total_pages=total_pages,
     )
+
+
+@router.post("/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: UserInDB = Depends(get_current_active_user),
+):
+    """Upload an image for blog posts"""
+    # Check file type
+    allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only image files (JPEG, PNG, GIF, WebP) are allowed",
+        )
+
+    # Check file size (5MB limit)
+    file_size = 0
+    content = await file.read()
+    file_size = len(content)
+
+    if file_size > 5 * 1024 * 1024:  # 5MB
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size too large. Maximum size is 5MB",
+        )
+
+    # Generate unique filename
+    file_extension = Path(file.filename).suffix.lower()
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("uploads")
+    upload_dir.mkdir(exist_ok=True)
+
+    # Save file
+    file_path = upload_dir / unique_filename
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(content)
+
+    # Return the URL for the uploaded image
+    return {"url": f"/uploads/{unique_filename}", "filename": unique_filename}
+
+
+@router.get("/uploads/{filename}")
+async def serve_uploaded_file(filename: str):
+    """Serve uploaded images"""
+    file_path = Path("uploads") / filename
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="File not found"
+        )
+
+    return FileResponse(file_path)
 
 
 @router.get("/{slug}", response_model=PostResponse)
@@ -90,13 +144,7 @@ async def update_post(
             detail="Not authorized to update this post",
         )
 
-    # Check if new slug already exists (if changing slug)
-    if post_update.slug and post_update.slug != db_post.slug:
-        if await PostRepository.slug_exists(post_update.slug, exclude_id=post_id):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Slug already exists"
-            )
-
+    # Update the post
     updated_post = await PostRepository.update_post(post_id, post_update)
     if not updated_post:
         raise HTTPException(
@@ -127,6 +175,7 @@ async def delete_post(
             detail="Not authorized to delete this post",
         )
 
+    # Delete the post
     success = await PostRepository.delete_post(post_id)
     if not success:
         raise HTTPException(
@@ -178,12 +227,11 @@ async def toggle_post_visibility(
             detail="Not authorized to modify this post",
         )
 
-    # Toggle visibility
+    # Toggle the published status
     new_status = not db_post.is_published
-    post_update = PostUpdate(is_published=new_status)
+    success = await PostRepository.toggle_post_visibility(post_id, new_status)
 
-    updated_post = await PostRepository.update_post(post_id, post_update)
-    if not updated_post:
+    if not success:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update post visibility",
