@@ -78,17 +78,6 @@ async def login_user(user: UserLogin, response: Response):
         user_data=user_data, expires_delta=access_token_expires
     )
 
-    # Development: Minimal restrictions for cross-origin testing
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        max_age=settings.access_token_expire_minutes * 60,
-        httponly=False,  # Must be False for cross-origin in development
-        secure=False,  # Must be False for localhost HTTP
-        path="/",
-        # Remove samesite completely for development
-    )
-
     return {
         "message": "Login successful",
         "access_token": access_token,  # Send token in response for frontend to use
