@@ -12,8 +12,10 @@ class ApiClient {
         
         // Add Authorization header if token exists
         const token = sessionStorage.getItem('access_token');
+        console.log('getHeaders - token from sessionStorage:', token ? 'found' : 'not found');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
+            console.log('Authorization header set');
         }
         
         return headers;
@@ -68,6 +70,8 @@ class ApiClient {
             console.log(`API Request: ${method} ${endpoint}`, {
                 needsCredentials: needsCreds,
                 hasCredentials: !!config.credentials,
+                hasAuthHeader: !!config.headers['Authorization'],
+                authHeader: config.headers['Authorization'] ? 'Bearer ***' : 'none',
                 endpoint: endpoint
             });
         }
@@ -187,11 +191,14 @@ class ApiClient {
         const formData = new FormData();
         formData.append('file', file);
         
+        // Get headers but remove Content-Type for FormData
+        const headers = this.getHeaders();
+        delete headers['Content-Type']; // Browser will set this automatically for FormData
+        
         return this.request('/posts/upload-image', {
             method: 'POST',
             body: formData,
-            // Don't set Content-Type, let browser set it with boundary for FormData
-            headers: {}  // Remove Content-Type for FormData, credentials will be included automatically
+            headers: headers  // Keep Authorization header but remove Content-Type
         });
     }
 }

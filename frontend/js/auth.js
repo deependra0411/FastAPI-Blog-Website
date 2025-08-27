@@ -2,30 +2,39 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
-        this.initializeAuth();
+        this.isInitialized = false;
+        this.initPromise = this.initializeAuth();
     }
 
     // Initialize authentication state
     async initializeAuth() {
         // Check if we have a stored token
         const token = sessionStorage.getItem('access_token');
+        console.log('Init auth - token found:', !!token);
+        
         if (!token) {
+            console.log('No token found, setting unauthenticated state');
             this.currentUser = null;
             this.updateUIForUnauthenticatedUser();
             return;
         }
         
         try {
+            console.log('Token found, verifying with /me endpoint');
             // Verify token by calling the /me endpoint
             const userData = await api.getCurrentUser();
+            console.log('Token valid, user data:', userData);
             this.currentUser = userData;
             this.updateUIForAuthenticatedUser();
         } catch (error) {
+            console.log('Token verification failed:', error);
             // Token is invalid, clear it
             sessionStorage.removeItem('access_token');
             this.currentUser = null;
             this.updateUIForUnauthenticatedUser();
         }
+        
+        this.isInitialized = true;
     }
 
     // Login user
@@ -87,8 +96,20 @@ class AuthManager {
         showPage('home');
     }
 
+    // Wait for auth initialization to complete
+    async waitForInit() {
+        await this.initPromise;
+        return this.isInitialized;
+    }
+
     // Check if user is authenticated
     isAuthenticated() {
+        return !!this.currentUser;
+    }
+
+    // Check if user is authenticated (async version that waits for init)
+    async isAuthenticatedAsync() {
+        await this.waitForInit();
         return !!this.currentUser;
     }
 
