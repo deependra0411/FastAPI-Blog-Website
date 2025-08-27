@@ -81,13 +81,8 @@ def verify_token(token: str, credentials_exception):
 
 
 def get_token_from_request(request: Request) -> Optional[str]:
-    """Extract token from either Authorization header or cookie"""
-    # Try to get token from cookie first
-    token = request.cookies.get("access_token")
-    if token:
-        return token
-
-    # Fall back to Authorization header
+    """Extract token from Authorization header"""
+    #  Authorization header
     authorization = request.headers.get("Authorization")
     if authorization and authorization.startswith("Bearer "):
         return authorization.split(" ")[1]
