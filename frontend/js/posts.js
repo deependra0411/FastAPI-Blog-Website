@@ -314,7 +314,6 @@ class PostsManager {
             document.getElementById('postTitle').value = postData.title;
             document.getElementById('postTagline').value = postData.tagline || '';
             document.getElementById('postSlug').value = postData.slug;
-            document.getElementById('postImage').value = postData.img_file || '';
             document.getElementById('postPublished').checked = postData.is_published;
             
             // Set Quill content
@@ -344,7 +343,6 @@ class PostsManager {
         const title = document.getElementById('postTitle').value.trim();
         const tagline = document.getElementById('postTagline').value.trim();
         const slug = document.getElementById('postSlug').value.trim();
-        const imgFile = document.getElementById('postImage').value.trim();
         
         // Get content from Quill editor
         let content = '';
