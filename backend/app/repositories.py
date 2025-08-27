@@ -272,7 +272,7 @@ class PostRepository:
     @staticmethod
     async def delete_post(post_id: int) -> bool:
         """Delete post"""
-        query = "DELETE FROM posts WHERE id = :id"
+        query = "DELETE FROM posts WHERE id = :id returning id"
         result = await db_manager.execute_delete(query, {"id": post_id})
         return result > 0
 
