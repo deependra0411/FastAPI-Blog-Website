@@ -83,6 +83,17 @@ class ApiClient {
         return this.get('/auth/me');
     }
 
+    async updateUserProfile(profileData) {
+        return this.put('/auth/me', profileData);
+    }
+
+    async changePassword(currentPassword, newPassword) {
+        return this.put('/auth/change-password', { 
+            current_password: currentPassword, 
+            new_password: newPassword 
+        });
+    }
+
     // Posts endpoints
     async getPosts(page = 1, perPage = CONFIG.POSTS_PER_PAGE) {
         return this.get(`/posts/?page=${page}&per_page=${perPage}`);
@@ -93,7 +104,7 @@ class ApiClient {
     }
 
     async createPost(postData) {
-        return this.post('/posts/', postData);
+        return this.post('/posts/create_post', postData);
     }
 
     async updatePost(postId, postData) {
@@ -106,6 +117,14 @@ class ApiClient {
 
     async getUserPosts(page = 1, perPage = 10) {
         return this.get(`/posts/user/my-posts?page=${page}&per_page=${perPage}`);
+    }
+
+    async getAllUserPosts(page = 1, perPage = 10, showUnpublished = false) {
+        return this.get(`/posts/user/all-posts?page=${page}&per_page=${perPage}&show_unpublished=${showUnpublished}`);
+    }
+
+    async togglePostVisibility(postId) {
+        return this.put(`/posts/${postId}/toggle-visibility`);
     }
 
     // Contact endpoint

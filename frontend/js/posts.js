@@ -96,7 +96,10 @@ class PostsManager {
         }
 
         try {
-            const response = await api.getUserPosts();
+            const showUnpublished = document.getElementById('showUnpublished')?.checked ?? false;
+            console.log('Loading user posts with showUnpublished:', showUnpublished);
+            const response = await api.getAllUserPosts(1, 10, showUnpublished);
+            console.log('User posts response:', response);
             this.renderUserPosts(response.posts);
         } catch (error) {
             console.error('Error loading user posts:', error);
@@ -119,7 +122,12 @@ class PostsManager {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h5 class="card-title">${this.escapeHtml(post.title)}</h5>
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="card-title mb-0">${this.escapeHtml(post.title)}</h5>
+                                <span class="badge ${post.is_published ? 'bg-success' : 'bg-secondary'} ms-2">
+                                    ${post.is_published ? 'Published' : 'Draft'}
+                                </span>
+                            </div>
                             <p class="card-text text-muted">${this.escapeHtml(post.tagline || '')}</p>
                             <p class="card-text">
                                 <small class="text-muted">
@@ -135,6 +143,15 @@ class PostsManager {
                             <button class="btn btn-sm btn-outline-secondary" onclick="postsManager.editPost(${post.id})">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
+                            <div class="form-check form-switch d-inline-block me-2">
+                                <input class="form-check-input" type="checkbox" id="toggle-${post.id}" 
+                                       ${post.is_published ? 'checked' : ''} 
+                                       onchange="postsManager.toggleVisibility(${post.id})"
+                                       title="${post.is_published ? 'Click to unpublish' : 'Click to publish'}">
+                                <label class="form-check-label" for="toggle-${post.id}">
+                                    <small>${post.is_published ? 'Published' : 'Draft'}</small>
+                                </label>
+                            </div>
                             <button class="btn btn-sm btn-outline-danger" onclick="postsManager.deletePost(${post.id}, '${this.escapeHtml(post.title)}')">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -201,10 +218,16 @@ class PostsManager {
             document.getElementById('postSlug').value = postData.slug;
             document.getElementById('postImage').value = postData.img_file || '';
             document.getElementById('postContent').value = postData.content;
+            document.getElementById('postPublished').checked = postData.is_published;
+            
+            // Update toggle label based on current status
+            this.updatePublishToggleLabel(postData.is_published);
         } else {
             // Creating new post
             title.textContent = 'Create New Post';
             document.getElementById('postId').value = '';
+            document.getElementById('postPublished').checked = true; // Default to published for new posts
+            this.updatePublishToggleLabel(true);
         }
         
         const bsModal = new bootstrap.Modal(modal);
@@ -218,6 +241,7 @@ class PostsManager {
         const slug = document.getElementById('postSlug').value.trim();
         const imgFile = document.getElementById('postImage').value.trim();
         const content = document.getElementById('postContent').value.trim();
+        const isPublished = document.getElementById('postPublished').checked;
         const postId = document.getElementById('postId').value;
         
         // Validation
@@ -234,18 +258,24 @@ class PostsManager {
             tagline: tagline || null,
             slug: finalSlug,
             content,
-            img_file: imgFile || null
+            img_file: imgFile || null,
+            is_published: isPublished
         };
         
         try {
+            console.log('Saving post with data:', postData);
             if (postId) {
                 // Update existing post
-                await api.updatePost(parseInt(postId), postData);
-                showToast('Success', 'Post updated successfully!', 'success');
+                const response = await api.updatePost(parseInt(postId), postData);
+                console.log('Update response:', response);
+                const statusText = isPublished ? 'published' : 'saved as draft';
+                showToast('Success', `Post ${statusText} successfully!`, 'success');
             } else {
                 // Create new post
-                await api.createPost(postData);
-                showToast('Success', 'Post created successfully!', 'success');
+                const response = await api.createPost(postData);
+                console.log('Create response:', response);
+                const statusText = isPublished ? 'published' : 'saved as draft';
+                showToast('Success', `Post ${statusText} successfully!`, 'success');
             }
             
             // Close modal
@@ -298,6 +328,22 @@ class PostsManager {
         }
     }
 
+    // Toggle post visibility
+    async toggleVisibility(postId) {
+        try {
+            console.log('Toggling visibility for post:', postId);
+            const response = await api.togglePostVisibility(postId);
+            console.log('Toggle response:', response);
+            showToast('Success', response.message, 'success');
+            this.loadUserPosts(); // Reload user posts to reflect changes
+        } catch (error) {
+            console.error('Error toggling post visibility:', error);
+            showToast('Error', error.message || 'Failed to toggle post visibility', 'error');
+            // Reload to revert the toggle if there was an error
+            this.loadUserPosts();
+        }
+    }
+
     // Render empty state for home page
     renderEmptyState(message) {
         const container = document.getElementById('postsContainer');
@@ -345,6 +391,16 @@ class PostsManager {
         tmp.innerHTML = html;
         return tmp.textContent || tmp.innerText || "";
     }
+
+    // Update publish toggle label
+    updatePublishToggleLabel(isPublished) {
+        const toggleLabel = document.querySelector('label[for="postPublished"]');
+        if (toggleLabel) {
+            const icon = isPublished ? 'fa-eye' : 'fa-eye-slash';
+            const text = isPublished ? 'Publish immediately' : 'Save as draft';
+            toggleLabel.innerHTML = `<i class="fas ${icon} me-1"></i> ${text}`;
+        }
+    }
 }
 
 // Create global posts manager instance
@@ -363,7 +419,7 @@ function savePost() {
     postsManager.savePost();
 }
 
-// Auto-generate slug from title
+// Auto-generate slug from title and handle publish toggle
 document.addEventListener('DOMContentLoaded', function() {
     const titleInput = document.getElementById('postTitle');
     const slugInput = document.getElementById('postSlug');
@@ -373,6 +429,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!slugInput.value || postsManager.currentEditingPost === null) {
                 slugInput.value = slugify(this.value);
             }
+        });
+    }
+
+    // Handle publish toggle changes in post editor
+    const publishToggle = document.getElementById('postPublished');
+    if (publishToggle) {
+        publishToggle.addEventListener('change', function() {
+            postsManager.updatePublishToggleLabel(this.checked);
         });
     }
 });

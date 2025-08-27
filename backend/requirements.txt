@@ -4,9 +4,8 @@ uvicorn==0.24.0
 python-multipart==0.0.6
 
 # Database
-sqlalchemy==2.0.23
-pymysql==1.1.0
-cryptography==41.0.7
+asyncpg==0.29.0
+databases==0.8.0
 
 # Authentication
 python-jose[cryptography]==3.3.0

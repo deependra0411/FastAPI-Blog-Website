@@ -87,6 +87,14 @@ class App {
                 }
                 await postsManager.loadUserPosts();
                 break;
+            case 'profile':
+                if (!authManager.isAuthenticated()) {
+                    this.showPage('login');
+                    showToast('Error', 'Please login to access profile', 'error');
+                    return;
+                }
+                authManager.loadProfileData();
+                break;
         }
     }
 
@@ -186,6 +194,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Toggle for showing unpublished posts
+    const showUnpublishedToggle = document.getElementById('showUnpublished');
+    if (showUnpublishedToggle) {
+        showUnpublishedToggle.addEventListener('change', (e) => {
+            console.log('Show unpublished toggle changed:', e.target.checked);
+            if (app.getCurrentPage() === 'dashboard') {
+                console.log('Reloading user posts due to toggle change');
+                postsManager.loadUserPosts();
+            }
+        });
+    }
 
     // Handle navbar scroll effect
     const navbar = document.getElementById('mainNav');

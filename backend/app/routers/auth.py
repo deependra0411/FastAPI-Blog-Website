@@ -2,31 +2,36 @@ from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from ..auth import (
     authenticate_user,
     create_access_token,
     get_current_active_user,
+    get_current_user,
     get_password_hash,
 )
 from ..config import get_settings
-from ..database import get_db
-from ..models import User
-from ..schemas import SuccessResponse, Token, UserCreate, UserLogin, UserResponse
+from ..models import Token, UserCreate, UserInDB, UserLogin, UserResponse, UserUpdate
+from ..repositories import UserRepository
 
 settings = get_settings()
 router = APIRouter()
 
 
-@router.post("/register", response_model=SuccessResponse)
-async def register_user(user: UserCreate, db: Session = Depends(get_db)):
+# Success response model
+class SuccessResponse:
+    def __init__(self, message: str, success: bool = True):
+        self.message = message
+        self.success = success
+
+
+@router.post("/register")
+async def register_user(user: UserCreate):
     """Register a new user"""
     try:
         # Check if user already exists
-        db_user = db.query(User).filter(User.email == user.email).first()
-        if db_user:
+        existing_user = await UserRepository.get_user_by_email(user.email)
+        if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered",
@@ -34,25 +39,13 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
         # Create new user
         hashed_password = get_password_hash(user.password)
-        db_user = User(
-            name=user.name,
-            email=user.email,
-            password=hashed_password,
-            is_admin=(user.email == settings.admin_email),
-        )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        db_user = await UserRepository.create_user(user, hashed_password)
 
-        return SuccessResponse(message="User registered successfully")
+        return {"message": "User registered successfully", "success": True}
 
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
-        )
+    except HTTPException:
+        raise
     except Exception:
-        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Registration failed",
@@ -60,9 +53,9 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-async def login_user(user: UserLogin, db: Session = Depends(get_db)):
+async def login_user(user: UserLogin):
     """Authenticate user and return access token"""
-    authenticated_user = authenticate_user(db, user.email, user.password)
+    authenticated_user = await authenticate_user(user.email, user.password)
     if not authenticated_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -78,11 +71,9 @@ async def login_user(user: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     """OAuth2 compatible token endpoint"""
-    user = authenticate_user(db, form_data.username, form_data.password)
+    user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -97,6 +88,114 @@ async def login_for_access_token(
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: User = Depends(get_current_active_user)):
+async def get_current_user_info(
+    current_user: UserInDB = Depends(get_current_active_user),
+):
     """Get current user information"""
-    return current_user
+    return UserResponse(
+        id=current_user.id,
+        name=current_user.name,
+        email=current_user.email,
+        is_active=current_user.is_active,
+        is_admin=current_user.is_admin,
+        created_at=current_user.created_at,
+    )
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_user_profile(
+    user_update: UserUpdate,
+    current_user: UserInDB = Depends(get_current_active_user),
+):
+    """Update current user's profile information"""
+    try:
+        # Check if email is being changed and if it already exists
+        if user_update.email and user_update.email != current_user.email:
+            existing_user = await UserRepository.get_user_by_email(user_update.email)
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered",
+                )
+
+        # Update user profile
+        updated_user = await UserRepository.update_user(current_user.id, user_update)
+        if isinstance(updated_user, HTTPException):
+            raise updated_user
+
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update profile",
+            )
+
+        return UserResponse(
+            id=updated_user.id,
+            name=updated_user.name,
+            email=updated_user.email,
+            is_active=updated_user.is_active,
+            is_admin=updated_user.is_admin,
+            created_at=updated_user.created_at,
+        )
+
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile",
+        )
+
+
+@router.put("/change-password")
+async def change_password(
+    request: dict,
+    current_user: UserInDB = Depends(get_current_user),
+):
+    """Change user password"""
+    try:
+        current_password = request.get("current_password")
+        new_password = request.get("new_password")
+
+        if not current_password or not new_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Both current and new password are required",
+            )
+
+        if len(new_password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password must be at least 6 characters long",
+            )
+
+        # Import auth functions locally to avoid circular import
+        from ..auth import get_password_hash, verify_password
+
+        # Verify current password against the stored hashed password
+        if not verify_password(current_password, current_user.password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid current password",
+            )
+
+        # Hash new password and update
+        hashed_password = get_password_hash(new_password)
+        success = await UserRepository.update_password(current_user.id, hashed_password)
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update password",
+            )
+
+        return {"message": "Password updated successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Password change error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to change password",
+        )

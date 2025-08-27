@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Optional
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+
 from .config import get_settings
-from .database import get_db
-from .models import User
-from .schemas import TokenData
+from .models import TokenData, UserInDB
+from .repositories import UserRepository
 
 settings = get_settings()
 
@@ -35,17 +35,23 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
-    
+        expire = datetime.utcnow() + timedelta(
+            minutes=settings.access_token_expire_minutes
+        )
+
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.secret_key, algorithm=settings.algorithm
+    )
     return encoded_jwt
 
 
 def verify_token(token: str, credentials_exception):
     """Verify JWT token"""
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
@@ -55,9 +61,8 @@ def verify_token(token: str, credentials_exception):
     return token_data
 
 
-def get_current_user(
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
 ):
     """Get current authenticated user"""
     credentials_exception = HTTPException(
@@ -65,24 +70,24 @@ def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     token_data = verify_token(credentials.credentials, credentials_exception)
-    user = db.query(User).filter(User.email == token_data.email).first()
+    user = await UserRepository.get_user_by_email(token_data.email)
     if user is None:
         raise credentials_exception
     return user
 
 
-def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)):
     """Get current active user"""
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
-def authenticate_user(db: Session, email: str, password: str):
+async def authenticate_user(email: str, password: str):
     """Authenticate user with email and password"""
-    user = db.query(User).filter(User.email == email).first()
+    user = await UserRepository.get_user_by_email(email)
     if not user:
         return False
     if not verify_password(password, user.password):

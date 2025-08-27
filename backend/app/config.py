@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Database settings
-    database_url: str = "mysql://root:admin123@localhost/blog"
+    database_url: str = "postgresql://username:password@localhost/blog_db"
 
     # Security settings
     secret_key: str = "super-secret-key"
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Blog settings
     blog_name: str = "Python Coders"
     blog_title: str = "Start learning today"
-    no_of_posts_per_page: int = 3
+    no_of_posts_per_page: int = 10
 
     # File upload settings
     upload_location: str = "./uploads"
@@ -28,15 +28,8 @@ class Settings(BaseSettings):
     facebook_url: str = "https://www.facebook.com/"
     github_url: str = "https://github.com/"
 
-    # Admin settings
-    admin_email: str = "admin@pythoncoders.com"
-
     # CORS settings
-    cors_origins: list = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8080",
-    ]
+    cors_origins: list = ["*"]
 
     # API settings
     api_prefix: str = "/api/v1"
