@@ -366,17 +366,19 @@ footer .fa-stack:hover {
 
 /* Pagination */
 .pagination-wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-top: 3rem;
-    flex-wrap: wrap;
-    gap: 1rem;
 }
 
-.pagination-info {
-    color: var(--secondary-color);
-    font-size: 0.875rem;
+/* Ensure pagination buttons don't wrap */
+.pagination-wrapper .btn {
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+/* Center pagination info text */
+.pagination-wrapper .text-center span {
+    display: inline-block;
+    line-height: 1.4;
 }
 
 /* Error States */

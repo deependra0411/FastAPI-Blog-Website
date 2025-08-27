@@ -157,39 +157,37 @@ class PostsManager {
         const paginationContainer = document.getElementById('pagination');
         if (!paginationContainer) return;
 
-        let paginationHTML = '';
+        paginationContainer.innerHTML = `
+            <div class="container-fluid py-3">
+                <div class="row align-items-center">
+                    <!-- Previous Button (Left) -->
+                    <div class="col-4 d-flex justify-content-start">
+                        ${response.page > 1 ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page - 1})">
+                                <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
+                            </button>
+                        ` : ''}
+                    </div>
 
-        // Previous button
-        if (response.page > 1) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page - 1})">
-                    <i class="fas fa-arrow-left"></i> Previous Posts
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
+                    <!-- Page Info (Center) -->
+                    <div class="col-4 text-center">
+                        <span class="text-muted fw-normal">
+                            Page ${response.page} of ${response.total_pages}
+                            <br><small>(${response.total} total posts)</small>
+                        </span>
+                    </div>
 
-        // Page info
-        paginationHTML += `
-            <span class="pagination-info">
-                Page ${response.page} of ${response.total_pages} 
-                (${response.total} total posts)
-            </span>
+                    <!-- Next Button (Right) -->
+                    <div class="col-4 d-flex justify-content-end">
+                        ${response.page < response.total_pages ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page + 1})">
+                                NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
         `;
-
-        // Next button
-        if (response.page < response.total_pages) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page + 1})">
-                    Next Posts <i class="fas fa-arrow-right"></i>
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
-
-        paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
     }
 
     // Render pagination for user posts
@@ -198,31 +196,33 @@ class PostsManager {
         if (!paginationContainer) return;
 
         paginationContainer.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center py-3">
-                <!-- Previous Button (Left) -->
-                <div>
-                    ${response.page > 1 ? `
-                        <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
-                            <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
-                        </button>
-                    ` : '<div></div>'}
-                </div>
-                
-                <!-- Page Info (Center) -->
-                <div class="text-center">
-                    <span class="text-muted">
-                        Page ${response.page} of ${response.total_pages} 
-                        <small>(${response.total} total posts)</small>
-                    </span>
-                </div>
-                
-                <!-- Next Button (Right) -->
-                <div>
-                    ${response.page < response.total_pages ? `
-                        <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
-                            NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    ` : '<div></div>'}
+            <div class="container-fluid py-3">
+                <div class="row align-items-center">
+                    <!-- Previous Button (Left) -->
+                    <div class="col-4 d-flex justify-content-start">
+                        ${response.page > 1 ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
+                                <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <!-- Page Info (Center) -->
+                    <div class="col-4 text-center">
+                        <span class="text-muted fw-normal">
+                            Page ${response.page} of ${response.total_pages}
+                            <br><small>(${response.total} total posts)</small>
+                        </span>
+                    </div>
+
+                    <!-- Next Button (Right) -->
+                    <div class="col-4 d-flex justify-content-end">
+                        ${response.page < response.total_pages ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
+                                NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;
