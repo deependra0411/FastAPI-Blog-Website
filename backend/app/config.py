@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     secret_key: str = "super-secret-key"
     csrf_secret_key: str = "b_53oi3uriq9pifpff;apl"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 1
+    access_token_expire_minutes: int = 30
 
     # Blog settings
     blog_name: str = "Python Coders"
@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     github_url: str = "https://github.com/"
 
     # CORS settings
-    cors_origins: list = ["*"]
+    cors_origins: list = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     # API settings
     api_prefix: str = "/api/v1"

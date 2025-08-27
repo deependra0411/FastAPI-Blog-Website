@@ -9,7 +9,5 @@ const CONFIG = {
         facebook: 'https://www.facebook.com/',
         github: 'https://github.com/'
     },
-    TOAST_DURATION: 5000,
-    TOKEN_KEY: 'blog_access_token',
-    USER_KEY: 'blog_user_data'
+    TOAST_DURATION: 5000
 };

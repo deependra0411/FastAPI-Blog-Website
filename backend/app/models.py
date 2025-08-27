@@ -162,6 +162,10 @@ class TokenData(BaseModel):
     """Token data model"""
 
     email: Optional[str] = None
+    user_id: Optional[int] = None
+    name: Optional[str] = None
+    is_admin: Optional[bool] = False
+    is_active: Optional[bool] = True
 
 
 class UserLogin(BaseModel):

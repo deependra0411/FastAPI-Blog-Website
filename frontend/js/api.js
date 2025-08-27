@@ -4,13 +4,14 @@ class ApiClient {
         this.baseURL = baseURL;
     }
 
-    // Get auth headers
-    getAuthHeaders() {
-        const token = localStorage.getItem(CONFIG.TOKEN_KEY);
+    // Get headers with Authorization token
+    getHeaders() {
         const headers = {
             'Content-Type': 'application/json'
         };
         
+        // Add Authorization header if token exists
+        const token = sessionStorage.getItem('access_token');
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -18,13 +19,58 @@ class ApiClient {
         return headers;
     }
 
+    // Check if endpoint needs credentials (authentication)
+    needsCredentials(endpoint) {
+        // Authentication endpoints that need credentials
+        const authEndpoints = [
+            '/auth/me',
+            '/auth/logout', 
+            '/auth/change-password',
+            '/posts/create_post',
+            '/posts/upload-image',
+            '/posts/user/',
+            '/posts/delete/',
+            '/posts/toggle-visibility'
+        ];
+        
+        // Check if it's an auth endpoint
+        const needsAuth = authEndpoints.some(authPath => 
+            endpoint.startsWith(authPath) || endpoint.includes(authPath)
+        );
+        
+        // Check for PUT/DELETE operations on posts (these need auth)
+        const isPostMutation = (endpoint.startsWith('/posts/') && 
+            (endpoint.includes('/delete/') || endpoint.includes('/toggle-visibility'))) ||
+            (endpoint.match(/^\/posts\/\d+$/) && this.lastMethod && this.lastMethod !== 'GET');
+        
+        return needsAuth || isPostMutation;
+    }
+
     // Generic request method
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+        const method = options.method || 'GET';
+        this.lastMethod = method; // Store for needsCredentials check
+        
         const config = {
-            headers: this.getAuthHeaders(),
+            headers: this.getHeaders(),
             ...options
         };
+        
+        // Only include credentials for authenticated endpoints
+        const needsCreds = this.needsCredentials(endpoint);
+        if (needsCreds) {
+            config.credentials = 'include';
+        }
+        
+        // Debug logging (only for auth issues)
+        if (needsCreds || endpoint.includes('/auth/') || endpoint.includes('/user/')) {
+            console.log(`API Request: ${method} ${endpoint}`, {
+                needsCredentials: needsCreds,
+                hasCredentials: !!config.credentials,
+                endpoint: endpoint
+            });
+        }
 
         try {
             showLoadingSpinner(true);
@@ -87,6 +133,10 @@ class ApiClient {
         return this.put('/auth/me', profileData);
     }
 
+    async logout() {
+        return this.post('/auth/logout', {});
+    }
+
     async changePassword(currentPassword, newPassword) {
         return this.put('/auth/change-password', { 
             current_password: currentPassword, 
@@ -141,9 +191,7 @@ class ApiClient {
             method: 'POST',
             body: formData,
             // Don't set Content-Type, let browser set it with boundary for FormData
-            headers: Object.fromEntries(
-                Object.entries(this.getAuthHeaders()).filter(([key]) => key !== 'Content-Type')
-            )
+            headers: {}  // Remove Content-Type for FormData, credentials will be included automatically
         });
     }
 }

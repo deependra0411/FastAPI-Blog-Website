@@ -1,14 +1,13 @@
-from math import ceil
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status, UploadFile, File
-from fastapi.responses import FileResponse
-import os
 import uuid
+from math import ceil
 from pathlib import Path
 
-from ..auth import get_current_active_user
+from fastapi import APIRouter, File, HTTPException, Query, Request, UploadFile, status
+from fastapi.responses import FileResponse
+
+from ..auth import get_current_active_user_from_request
 from ..config import get_settings
-from ..models import PostCreate, PostListResponse, PostResponse, PostUpdate, UserInDB
+from ..models import PostCreate, PostListResponse, PostResponse, PostUpdate
 from ..repositories import PostRepository
 
 settings = get_settings()
@@ -23,7 +22,9 @@ class SuccessResponse:
 
 
 @router.get("/", response_model=PostListResponse)
-async def get_posts(page: int = Query(1, ge=1), per_page: int = Query(10, ge=1, le=100)):
+async def get_posts(
+    page: int = Query(1, ge=1), per_page: int = Query(10, ge=1, le=100)
+):
     """Get all published posts with pagination"""
     posts, total = await PostRepository.get_posts_paginated(
         page=page, per_page=per_page, published_only=True
@@ -41,10 +42,11 @@ async def get_posts(page: int = Query(1, ge=1), per_page: int = Query(10, ge=1, 
 
 @router.post("/upload-image")
 async def upload_image(
+    request: Request,
     file: UploadFile = File(...),
-    current_user: UserInDB = Depends(get_current_active_user),
 ):
     """Upload an image for blog posts"""
+    current_user = await get_current_active_user_from_request(request)
     # Check file type
     allowed_types = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
     if file.content_type not in allowed_types:
@@ -109,9 +111,10 @@ async def get_post_by_slug(slug: str):
 @router.post("/create_post", response_model=PostResponse)
 async def create_post(
     post: PostCreate,
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Create a new post"""
+    current_user = await get_current_active_user_from_request(request)
     # Check if slug already exists
     if await PostRepository.slug_exists(post.slug):
         raise HTTPException(
@@ -127,9 +130,10 @@ async def create_post(
 async def update_post(
     post_id: int,
     post_update: PostUpdate,
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Update an existing post"""
+    current_user = await get_current_active_user_from_request(request)
     # Get the post
     db_post = await PostRepository.get_post_by_id(post_id)
     if not db_post:
@@ -158,9 +162,10 @@ async def update_post(
 @router.delete("/delete/{post_id}")
 async def delete_post(
     post_id: int,
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Delete a post"""
+    current_user = await get_current_active_user_from_request(request)
     # Get the post
     db_post = await PostRepository.get_post_by_id(post_id)
     if not db_post:
@@ -188,11 +193,12 @@ async def delete_post(
 
 @router.get("/user/my-posts", response_model=PostListResponse)
 async def get_user_posts(
+    request: Request,
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=100),
-    current_user: UserInDB = Depends(get_current_active_user),
 ):
     """Get current user's posts"""
+    current_user = await get_current_active_user_from_request(request)
     posts, total = await PostRepository.get_posts_by_author(
         author_id=current_user.id, page=page, per_page=per_page
     )
@@ -210,9 +216,10 @@ async def get_user_posts(
 @router.put("/{post_id}/toggle-visibility")
 async def toggle_post_visibility(
     post_id: int,
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Toggle post visibility (published/unpublished)"""
+    current_user = await get_current_active_user_from_request(request)
     # Get the post
     db_post = await PostRepository.get_post_by_id(post_id)
     if not db_post:
@@ -229,9 +236,12 @@ async def toggle_post_visibility(
 
     # Toggle the published status
     new_status = not db_post.is_published
-    success = await PostRepository.toggle_post_visibility(post_id, new_status)
 
-    if not success:
+    # Use PostUpdate to update just the is_published field
+    post_update = PostUpdate(is_published=new_status)
+    updated_post = await PostRepository.update_post(post_id, post_update)
+
+    if not updated_post:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update post visibility",
@@ -247,12 +257,13 @@ async def toggle_post_visibility(
 
 @router.get("/user/all-posts", response_model=PostListResponse)
 async def get_all_user_posts(
+    request: Request,
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=100),
     show_unpublished: bool = Query(),
-    current_user: UserInDB = Depends(get_current_active_user),
 ):
     """Get current user's posts (including unpublished if requested)"""
+    current_user = await get_current_active_user_from_request(request)
     if show_unpublished:
         is_published = False
     else:
