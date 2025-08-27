@@ -34,7 +34,7 @@ class PostsManager {
                     [{ 'header': [1, 2, 3, false] }],
                     ['bold', 'italic', 'underline', 'strike'],
                     [{ 'color': [] }, { 'background': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     [{ 'align': [] }],
                     ['blockquote', 'code-block'],
                     ['link', 'image'],
@@ -64,7 +64,7 @@ class PostsManager {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'image/*');
-        
+
         input.onchange = async () => {
             const file = input.files[0];
             if (!file) return;
@@ -84,21 +84,21 @@ class PostsManager {
             try {
                 // Show loading
                 showToast('Info', 'Uploading image...', 'info');
-                
+
                 // Upload the image
                 const response = await api.uploadImage(file);
-                
+
                 // Get current cursor position in Quill
                 const range = this.quillEditor.getSelection(true);
-                
+
                 // Insert the image at cursor position
                 // Construct full URL for the image
                 const imageUrl = `${CONFIG.API_BASE_URL.replace('/api/v1', '')}${response.url}`;
                 this.quillEditor.insertEmbed(range.index, 'image', imageUrl);
-                
+
                 // Move cursor after the image
                 this.quillEditor.setSelection(range.index + 1);
-                
+
                 showToast('Success', 'Image uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Error uploading image:', error);
@@ -116,7 +116,7 @@ class PostsManager {
             const response = await api.getPosts(page, CONFIG.POSTS_PER_PAGE);
             this.currentPage = response.page;
             this.totalPages = response.total_pages;
-            
+
             this.renderPosts(response.posts);
             this.renderPagination(response);
         } catch (error) {
@@ -135,7 +135,7 @@ class PostsManager {
             return;
         }
 
-                 container.innerHTML = posts.map(post => `
+        container.innerHTML = posts.map(post => `
              <div class="post-preview fade-in">
                  <a href="#post/${post.slug}" onclick="app.showPostDetail('${post.slug}'); return false;">
                      <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
@@ -240,11 +240,11 @@ class PostsManager {
             console.log('Loading user posts with showUnpublished:', showUnpublished, 'page:', page);
             const response = await api.getAllUserPosts(page, CONFIG.POSTS_PER_PAGE, showUnpublished);
             console.log('User posts response:', response);
-            
+
             // Update pagination state
             this.userPostsCurrentPage = response.page || page;
             this.userPostsTotalPages = response.total_pages || 1;
-            
+
             this.renderUserPosts(response.posts);
             this.renderUserPostsPagination(response);
         } catch (error) {
@@ -265,10 +265,10 @@ class PostsManager {
 
         container.innerHTML = posts.map(post => {
             // Truncate title if longer than 20 characters
-            const truncatedTitle = post.title.length > CONFIG.POST_TITLE_MAX_LENGTH ? 
-                post.title.substring(0, CONFIG.POST_TITLE_MAX_LENGTH) + '...' : 
+            const truncatedTitle = post.title.length > CONFIG.POST_TITLE_MAX_LENGTH ?
+                post.title.substring(0, CONFIG.POST_TITLE_MAX_LENGTH) + '...' :
                 post.title;
-            
+
             return `
             <div class="card mb-4 border shadow-sm">
                 <div class="card-body p-4">
@@ -340,16 +340,16 @@ class PostsManager {
         const modal = document.getElementById('postEditorModal');
         const title = document.getElementById('postEditorTitle');
         const form = document.getElementById('postForm');
-        
+
         // Reset form
         form.reset();
         this.currentEditingPost = postData;
-        
+
         // Clear Quill editor
         if (this.quillEditor) {
             this.quillEditor.setText('');
         }
-        
+
         if (postData) {
             // Editing existing post
             title.textContent = 'Edit Post';
@@ -358,14 +358,14 @@ class PostsManager {
             document.getElementById('postTagline').value = postData.tagline || '';
             document.getElementById('postSlug').value = postData.slug;
             document.getElementById('postPublished').checked = postData.is_published;
-            
+
             // Set Quill content
             if (this.quillEditor && postData.content) {
                 this.quillEditor.root.innerHTML = postData.content;
                 // Update hidden input
                 document.getElementById('postContentHidden').value = postData.content;
             }
-            
+
             // Update toggle label based on current status
             this.updatePublishToggleLabel(postData.is_published);
         } else {
@@ -376,7 +376,7 @@ class PostsManager {
             document.getElementById('postContentHidden').value = '';
             this.updatePublishToggleLabel(true);
         }
-        
+
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
     }
@@ -386,7 +386,7 @@ class PostsManager {
         const title = document.getElementById('postTitle').value.trim();
         const tagline = document.getElementById('postTagline').value.trim();
         const slug = document.getElementById('postSlug').value.trim();
-        
+
         // Get content from Quill editor
         let content = '';
         if (this.quillEditor) {
@@ -399,28 +399,28 @@ class PostsManager {
             // Fallback to hidden input
             content = document.getElementById('postContentHidden').value.trim();
         }
-        
+
         const isPublished = document.getElementById('postPublished').checked;
         const postId = document.getElementById('postId').value;
-        
+
         // Validation
         if (!title || !slug || !content) {
             showToast('Error', 'Please fill in all required fields', 'error');
             return;
         }
-        
+
         // Auto-generate slug if empty
         const finalSlug = slug || slugify(title);
-        
-                 const postData = {
-             title,
-             tagline: tagline || null,
-             slug: finalSlug,
-             content,
-             img_file: null, // Images are now handled via Quill editor
-             is_published: isPublished
-         };
-        
+
+        const postData = {
+            title,
+            tagline: tagline || null,
+            slug: finalSlug,
+            content,
+            img_file: null, // Images are now handled via Quill editor
+            is_published: isPublished
+        };
+
         try {
             console.log('Saving post with data:', postData);
             if (postId) {
@@ -436,11 +436,11 @@ class PostsManager {
                 const statusText = isPublished ? 'published' : 'saved as draft';
                 showToast('Success', `Post ${statusText} successfully!`, 'success');
             }
-            
+
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('postEditorModal'));
             modal.hide();
-            
+
             // Reload posts
             if (document.getElementById('dashboardPage').classList.contains('d-none') === false) {
                 this.loadUserPosts();
@@ -459,7 +459,7 @@ class PostsManager {
             // Get user posts to find the one being edited
             const response = await api.getUserPosts();
             const post = response.posts.find(p => p.id === postId);
-            
+
             if (post) {
                 this.showPostEditor(post);
             } else {
@@ -476,7 +476,7 @@ class PostsManager {
         if (!confirm(`Are you sure you want to delete "${postTitle}"? This action cannot be undone.`)) {
             return;
         }
-        
+
         try {
             await api.deletePost(postId);
             showToast('Success', 'Post deleted successfully!', 'success');
@@ -575,12 +575,12 @@ function savePost() {
 }
 
 // Auto-generate slug from title and handle publish toggle
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const titleInput = document.getElementById('postTitle');
     const slugInput = document.getElementById('postSlug');
-    
+
     if (titleInput && slugInput) {
-        titleInput.addEventListener('input', function() {
+        titleInput.addEventListener('input', function () {
             if (!slugInput.value || postsManager.currentEditingPost === null) {
                 slugInput.value = slugify(this.value);
             }
@@ -590,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle publish toggle changes in post editor
     const publishToggle = document.getElementById('postPublished');
     if (publishToggle) {
-        publishToggle.addEventListener('change', function() {
+        publishToggle.addEventListener('change', function () {
             postsManager.updatePublishToggleLabel(this.checked);
         });
     }
