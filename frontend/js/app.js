@@ -244,7 +244,9 @@ class App {
                 // Register page is static, no content to load
                 break;
             case 'dashboard':
-                if (!authManager.isAuthenticated()) {
+                // Wait for auth initialization before checking
+                const isAuth = await authManager.isAuthenticatedAsync();
+                if (!isAuth) {
                     this.showPage('login');
                     showToast('Error', 'Please login to access dashboard', 'error');
                     return;
@@ -252,7 +254,8 @@ class App {
                 await postsManager.loadUserPosts();
                 break;
             case 'profile':
-                if (!authManager.isAuthenticated()) {
+                const isAuthProfile = await authManager.isAuthenticatedAsync();
+                if (!isAuthProfile) {
                     this.showPage('login');
                     showToast('Error', 'Please login to access profile', 'error');
                     return;

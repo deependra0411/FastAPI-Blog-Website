@@ -1,17 +1,17 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ..auth import (
     authenticate_user,
     create_access_token,
-    get_current_active_user,
-    get_current_user,
+    get_current_active_user_from_request,
+    get_current_user_with_password,
     get_password_hash,
 )
 from ..config import get_settings
-from ..models import Token, UserCreate, UserInDB, UserLogin, UserResponse, UserUpdate
+from ..models import Token, UserCreate, UserLogin, UserResponse, UserUpdate
 from ..repositories import UserRepository
 
 settings = get_settings()
@@ -52,9 +52,9 @@ async def register_user(user: UserCreate):
         )
 
 
-@router.post("/login", response_model=Token)
-async def login_user(user: UserLogin):
-    """Authenticate user and return access token"""
+@router.post("/login")
+async def login_user(user: UserLogin, response: Response):
+    """Authenticate user and set secure cookie"""
     authenticated_user = await authenticate_user(user.email, user.password)
     if not authenticated_user:
         raise HTTPException(
@@ -64,10 +64,39 @@ async def login_user(user: UserLogin):
         )
 
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+
+    # Create token with comprehensive user data
+    user_data = {
+        "id": authenticated_user.id,
+        "name": authenticated_user.name,
+        "email": authenticated_user.email,
+        "is_admin": authenticated_user.is_admin,
+        "is_active": authenticated_user.is_active,
+    }
+
     access_token = create_access_token(
-        data={"sub": authenticated_user.email}, expires_delta=access_token_expires
+        user_data=user_data, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    return {
+        "message": "Login successful",
+        "access_token": access_token,  # Send token in response for frontend to use
+        "token_type": "bearer",
+        "user": {
+            "id": authenticated_user.id,
+            "name": authenticated_user.name,
+            "email": authenticated_user.email,
+            "is_admin": authenticated_user.is_admin,
+            "is_active": authenticated_user.is_active,
+        },
+    }
+
+
+@router.post("/logout")
+async def logout_user(response: Response):
+    """Logout user by clearing the access token cookie"""
+    response.delete_cookie(key="access_token", httponly=True, samesite="lax")
+    return {"message": "Logout successful"}
 
 
 @router.post("/token", response_model=Token)
@@ -81,17 +110,69 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+
+    # Create token with comprehensive user data
+    user_data = {
+        "id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "is_admin": user.is_admin,
+        "is_active": user.is_active,
+    }
+
     access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
+        user_data=user_data, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.get("/debug-auth")
+async def debug_auth(request: Request):
+    """Debug authentication - check cookies and token"""
+    from ..auth import get_token_from_request, verify_token
+
+    # Check what cookies we received
+    cookies = dict(request.cookies)
+
+    # Try to get token
+    token = get_token_from_request(request)
+
+    debug_info = {
+        "cookies_received": cookies,
+        "access_token_found": "access_token" in cookies,
+        "token_extracted": bool(token),
+        "token_length": len(token) if token else 0,
+    }
+
+    if token:
+        try:
+            credentials_exception = HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+            )
+            token_data = verify_token(token, credentials_exception)
+            debug_info["token_valid"] = True
+            debug_info["token_data"] = {
+                "email": token_data.email,
+                "user_id": token_data.user_id,
+                "name": token_data.name,
+                "is_admin": token_data.is_admin,
+                "is_active": token_data.is_active,
+            }
+        except Exception as e:
+            debug_info["token_valid"] = False
+            debug_info["token_error"] = str(e)
+
+    return debug_info
+
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Get current user information"""
+    current_user = await get_current_active_user_from_request(request)
+
     return UserResponse(
         id=current_user.id,
         name=current_user.name,
@@ -105,9 +186,11 @@ async def get_current_user_info(
 @router.put("/me", response_model=UserResponse)
 async def update_user_profile(
     user_update: UserUpdate,
-    current_user: UserInDB = Depends(get_current_active_user),
+    request: Request,
 ):
     """Update current user's profile information"""
+    current_user = await get_current_active_user_from_request(request)
+
     try:
         # Check if email is being changed and if it already exists
         if user_update.email and user_update.email != current_user.email:
@@ -149,13 +232,15 @@ async def update_user_profile(
 
 @router.put("/change-password")
 async def change_password(
-    request: dict,
-    current_user: UserInDB = Depends(get_current_user),
+    password_data: dict,
+    request: Request,
 ):
     """Change user password"""
+    current_user = await get_current_user_with_password(request)
+
     try:
-        current_password = request.get("current_password")
-        new_password = request.get("new_password")
+        current_password = password_data.get("current_password")
+        new_password = password_data.get("new_password")
 
         if not current_password or not new_password:
             raise HTTPException(

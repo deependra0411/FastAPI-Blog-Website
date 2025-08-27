@@ -34,7 +34,7 @@ class PostsManager {
                     [{ 'header': [1, 2, 3, false] }],
                     ['bold', 'italic', 'underline', 'strike'],
                     [{ 'color': [] }, { 'background': [] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                     [{ 'align': [] }],
                     ['blockquote', 'code-block'],
                     ['link', 'image'],
@@ -64,7 +64,7 @@ class PostsManager {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'image/*');
-        
+
         input.onchange = async () => {
             const file = input.files[0];
             if (!file) return;
@@ -84,21 +84,21 @@ class PostsManager {
             try {
                 // Show loading
                 showToast('Info', 'Uploading image...', 'info');
-                
+
                 // Upload the image
                 const response = await api.uploadImage(file);
-                
+
                 // Get current cursor position in Quill
                 const range = this.quillEditor.getSelection(true);
-                
+
                 // Insert the image at cursor position
                 // Construct full URL for the image
                 const imageUrl = `${CONFIG.API_BASE_URL.replace('/api/v1', '')}${response.url}`;
                 this.quillEditor.insertEmbed(range.index, 'image', imageUrl);
-                
+
                 // Move cursor after the image
                 this.quillEditor.setSelection(range.index + 1);
-                
+
                 showToast('Success', 'Image uploaded successfully!', 'success');
             } catch (error) {
                 console.error('Error uploading image:', error);
@@ -116,7 +116,7 @@ class PostsManager {
             const response = await api.getPosts(page, CONFIG.POSTS_PER_PAGE);
             this.currentPage = response.page;
             this.totalPages = response.total_pages;
-            
+
             this.renderPosts(response.posts);
             this.renderPagination(response);
         } catch (error) {
@@ -135,7 +135,7 @@ class PostsManager {
             return;
         }
 
-                 container.innerHTML = posts.map(post => `
+        container.innerHTML = posts.map(post => `
              <div class="post-preview fade-in">
                  <a href="#post/${post.slug}" onclick="app.showPostDetail('${post.slug}'); return false;">
                      <h2 class="post-title">${this.escapeHtml(post.title)}</h2>
@@ -157,39 +157,37 @@ class PostsManager {
         const paginationContainer = document.getElementById('pagination');
         if (!paginationContainer) return;
 
-        let paginationHTML = '';
+        paginationContainer.innerHTML = `
+            <div class="container-fluid py-3">
+                <div class="row align-items-center">
+                    <!-- Previous Button (Left) -->
+                    <div class="col-4 d-flex justify-content-start">
+                        ${response.page > 1 ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page - 1})">
+                                <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
+                            </button>
+                        ` : ''}
+                    </div>
 
-        // Previous button
-        if (response.page > 1) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page - 1})">
-                    <i class="fas fa-arrow-left"></i> Previous Posts
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
+                    <!-- Page Info (Center) -->
+                    <div class="col-4 text-center">
+                        <span class="text-muted fw-normal">
+                            Page ${response.page} of ${response.total_pages}
+                            <br><small>(${response.total} total posts)</small>
+                        </span>
+                    </div>
 
-        // Page info
-        paginationHTML += `
-            <span class="pagination-info">
-                Page ${response.page} of ${response.total_pages} 
-                (${response.total} total posts)
-            </span>
+                    <!-- Next Button (Right) -->
+                    <div class="col-4 d-flex justify-content-end">
+                        ${response.page < response.total_pages ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page + 1})">
+                                NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
         `;
-
-        // Next button
-        if (response.page < response.total_pages) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadPosts(${response.page + 1})">
-                    Next Posts <i class="fas fa-arrow-right"></i>
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
-
-        paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
     }
 
     // Render pagination for user posts
@@ -197,39 +195,37 @@ class PostsManager {
         const paginationContainer = document.getElementById('userPostsPagination');
         if (!paginationContainer) return;
 
-        let paginationHTML = '';
+        paginationContainer.innerHTML = `
+            <div class="container-fluid py-3">
+                <div class="row align-items-center">
+                    <!-- Previous Button (Left) -->
+                    <div class="col-4 d-flex justify-content-start">
+                        ${response.page > 1 ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
+                                <i class="fas fa-arrow-left me-2"></i>PREVIOUS POSTS
+                            </button>
+                        ` : ''}
+                    </div>
 
-        // Previous button
-        if (response.page > 1) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page - 1})">
-                    <i class="fas fa-arrow-left"></i> Previous Posts
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
+                    <!-- Page Info (Center) -->
+                    <div class="col-4 text-center">
+                        <span class="text-muted fw-normal">
+                            Page ${response.page} of ${response.total_pages}
+                            <br><small>(${response.total} total posts)</small>
+                        </span>
+                    </div>
 
-        // Page info
-        paginationHTML += `
-            <span class="pagination-info">
-                Page ${response.page} of ${response.total_pages} 
-                (${response.total} total posts)
-            </span>
+                    <!-- Next Button (Right) -->
+                    <div class="col-4 d-flex justify-content-end">
+                        ${response.page < response.total_pages ? `
+                            <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
+                                NEXT POSTS<i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
         `;
-
-        // Next button
-        if (response.page < response.total_pages) {
-            paginationHTML += `
-                <button class="btn btn-primary" onclick="postsManager.loadUserPosts(${response.page + 1})">
-                    Next Posts <i class="fas fa-arrow-right"></i>
-                </button>
-            `;
-        } else {
-            paginationHTML += '<span></span>'; // Empty span for spacing
-        }
-
-        paginationContainer.innerHTML = `<div class="pagination-wrapper">${paginationHTML}</div>`;
     }
 
     // Load and display user's posts in dashboard
@@ -244,11 +240,11 @@ class PostsManager {
             console.log('Loading user posts with showUnpublished:', showUnpublished, 'page:', page);
             const response = await api.getAllUserPosts(page, CONFIG.POSTS_PER_PAGE, showUnpublished);
             console.log('User posts response:', response);
-            
+
             // Update pagination state
             this.userPostsCurrentPage = response.page || page;
             this.userPostsTotalPages = response.total_pages || 1;
-            
+
             this.renderUserPosts(response.posts);
             this.renderUserPostsPagination(response);
         } catch (error) {
@@ -267,49 +263,69 @@ class PostsManager {
             return;
         }
 
-        container.innerHTML = posts.map(post => `
-            <div class="card post-card mb-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-2">
-                                <h5 class="card-title mb-0">${this.escapeHtml(post.title)}</h5>
-                                <span class="badge ${post.is_published ? 'bg-success' : 'bg-secondary'} ms-2">
-                                    ${post.is_published ? 'Published' : 'Draft'}
-                                </span>
-                            </div>
-                            <p class="card-text text-muted">${this.escapeHtml(post.tagline || '')}</p>
-                            <p class="card-text">
-                                <small class="text-muted">
-                                    Created: ${formatDateTime(post.created_at)}
-                                    ${post.updated_at ? `<br>Updated: ${formatDateTime(post.updated_at)}` : ''}
-                                </small>
-                            </p>
+        container.innerHTML = posts.map(post => {
+            // Truncate title if longer than 20 characters
+            const truncatedTitle = post.title.length > CONFIG.POST_TITLE_MAX_LENGTH ?
+                post.title.substring(0, CONFIG.POST_TITLE_MAX_LENGTH) + '...' :
+                post.title;
+
+            return `
+            <div class="card mb-4 border shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <!-- Title and Status Column -->
+                        <div class="col-lg-4 col-md-5 mb-3 mb-md-0">
+                            <h5 class="card-title mb-1" title="${this.escapeHtml(post.title)}">
+                                ${this.escapeHtml(truncatedTitle)}
+                            </h5>
+                            <span class="badge ${post.is_published ? 'bg-success' : 'bg-secondary'}">
+                                ${post.is_published ? 'Published' : 'Draft'}
+                            </span>
+                            ${post.tagline ? `<p class="text-muted small mb-0 mt-1">${this.escapeHtml(post.tagline)}</p>` : ''}
                         </div>
-                                                 <div class="post-actions">
-                             <button class="btn btn-sm btn-outline-primary" onclick="app.showPostDetail('${post.slug}')">
-                                 <i class="fas fa-eye"></i> View
-                             </button>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="postsManager.editPost(${post.id})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <div class="form-check form-switch d-inline-block me-2">
-                                <input class="form-check-input" type="checkbox" id="toggle-${post.id}" 
-                                       ${post.is_published ? 'checked' : ''} 
-                                       onchange="postsManager.toggleVisibility(${post.id})"
-                                       title="${post.is_published ? 'Click to unpublish' : 'Click to publish'}">
-                                <label class="form-check-label" for="toggle-${post.id}">
-                                    <small>${post.is_published ? 'Published' : 'Draft'}</small>
-                                </label>
+                        
+                        <!-- Dates Column -->
+                        <div class="col-lg-3 col-md-3 mb-3 mb-md-0">
+                            <small class="text-muted d-block">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Created: ${formatDate(post.created_at)}
+                            </small>
+                            ${post.updated_at ? `
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    Updated: ${formatDate(post.updated_at)}
+                                </small>
+                            ` : ''}
+                        </div>
+                        
+                        <!-- Actions Column -->
+                        <div class="col-lg-5 col-md-4">
+                            <div class="d-flex justify-content-end align-items-center gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="app.showPostDetail('${post.slug}')">
+                                    <i class="fas fa-eye"></i> VIEW
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="postsManager.editPost(${post.id})">
+                                    <i class="fas fa-edit"></i> EDIT
+                                </button>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="toggle-${post.id}" 
+                                           ${post.is_published ? 'checked' : ''} 
+                                           onchange="postsManager.toggleVisibility(${post.id})"
+                                           title="${post.is_published ? 'Click to unpublish' : 'Click to publish'}">
+                                    <label class="form-check-label" for="toggle-${post.id}">
+                                        <small>${post.is_published ? 'Pub' : 'Draft'}</small>
+                                    </label>
+                                </div>
+                                <button class="btn btn-outline-danger btn-sm" onclick="postsManager.deletePost(${post.id}, '${this.escapeHtml(post.title)}')">
+                                    <i class="fas fa-trash"></i> DELETE
+                                </button>
                             </div>
-                            <button class="btn btn-sm btn-outline-danger" onclick="postsManager.deletePost(${post.id}, '${this.escapeHtml(post.title)}')">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
 
@@ -324,16 +340,16 @@ class PostsManager {
         const modal = document.getElementById('postEditorModal');
         const title = document.getElementById('postEditorTitle');
         const form = document.getElementById('postForm');
-        
+
         // Reset form
         form.reset();
         this.currentEditingPost = postData;
-        
+
         // Clear Quill editor
         if (this.quillEditor) {
             this.quillEditor.setText('');
         }
-        
+
         if (postData) {
             // Editing existing post
             title.textContent = 'Edit Post';
@@ -342,14 +358,14 @@ class PostsManager {
             document.getElementById('postTagline').value = postData.tagline || '';
             document.getElementById('postSlug').value = postData.slug;
             document.getElementById('postPublished').checked = postData.is_published;
-            
+
             // Set Quill content
             if (this.quillEditor && postData.content) {
                 this.quillEditor.root.innerHTML = postData.content;
                 // Update hidden input
                 document.getElementById('postContentHidden').value = postData.content;
             }
-            
+
             // Update toggle label based on current status
             this.updatePublishToggleLabel(postData.is_published);
         } else {
@@ -360,9 +376,39 @@ class PostsManager {
             document.getElementById('postContentHidden').value = '';
             this.updatePublishToggleLabel(true);
         }
-        
+
+        // Initialize character counters after setting values
+        setTimeout(() => {
+            this.updateAllCounters();
+        }, 100);
+
         const bsModal = new bootstrap.Modal(modal);
         bsModal.show();
+    }
+
+    // Update all character counters
+    updateAllCounters() {
+        const updateCounter = (inputId, counterId, maxLength) => {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            if (counter && input) {
+                const currentLength = input.value.length;
+                counter.textContent = `${currentLength}/${maxLength}`;
+                
+                // Add visual warning when approaching limit
+                if (currentLength > maxLength * 0.9) {
+                    counter.className = 'text-warning';
+                } else if (currentLength === maxLength) {
+                    counter.className = 'text-danger';
+                } else {
+                    counter.className = 'text-muted';
+                }
+            }
+        };
+
+        updateCounter('postTitle', 'titleCounter', 100);
+        updateCounter('postTagline', 'taglineCounter', 100);
+        updateCounter('postSlug', 'slugCounter', 100);
     }
 
     // Save post (create or update)
@@ -370,7 +416,7 @@ class PostsManager {
         const title = document.getElementById('postTitle').value.trim();
         const tagline = document.getElementById('postTagline').value.trim();
         const slug = document.getElementById('postSlug').value.trim();
-        
+
         // Get content from Quill editor
         let content = '';
         if (this.quillEditor) {
@@ -383,28 +429,48 @@ class PostsManager {
             // Fallback to hidden input
             content = document.getElementById('postContentHidden').value.trim();
         }
-        
+
         const isPublished = document.getElementById('postPublished').checked;
         const postId = document.getElementById('postId').value;
-        
+
         // Validation
         if (!title || !slug || !content) {
             showToast('Error', 'Please fill in all required fields', 'error');
             return;
         }
-        
+
+        // Length validation using config constants
+        const titleMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.TITLE_MAX_LENGTH) ? CONFIG.TITLE_MAX_LENGTH : 100;
+        const taglineMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.TAGLINE_MAX_LENGTH) ? CONFIG.TAGLINE_MAX_LENGTH : 100;
+        const slugMaxLength = (typeof CONFIG !== 'undefined' && CONFIG.SLUG_MAX_LENGTH) ? CONFIG.SLUG_MAX_LENGTH : 100;
+
+        if (title.length > titleMaxLength) {
+            showToast('Error', `Title must not exceed ${titleMaxLength} characters`, 'error');
+            return;
+        }
+
+        if (tagline && tagline.length > taglineMaxLength) {
+            showToast('Error', `Tagline must not exceed ${taglineMaxLength} characters`, 'error');
+            return;
+        }
+
+        if (slug.length > slugMaxLength) {
+            showToast('Error', `Slug must not exceed ${slugMaxLength} characters`, 'error');
+            return;
+        }
+
         // Auto-generate slug if empty
         const finalSlug = slug || slugify(title);
-        
-                 const postData = {
-             title,
-             tagline: tagline || null,
-             slug: finalSlug,
-             content,
-             img_file: null, // Images are now handled via Quill editor
-             is_published: isPublished
-         };
-        
+
+        const postData = {
+            title,
+            tagline: tagline || null,
+            slug: finalSlug,
+            content,
+            img_file: null, // Images are now handled via Quill editor
+            is_published: isPublished
+        };
+
         try {
             console.log('Saving post with data:', postData);
             if (postId) {
@@ -420,11 +486,11 @@ class PostsManager {
                 const statusText = isPublished ? 'published' : 'saved as draft';
                 showToast('Success', `Post ${statusText} successfully!`, 'success');
             }
-            
+
             // Close modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('postEditorModal'));
             modal.hide();
-            
+
             // Reload posts
             if (document.getElementById('dashboardPage').classList.contains('d-none') === false) {
                 this.loadUserPosts();
@@ -443,7 +509,7 @@ class PostsManager {
             // Get user posts to find the one being edited
             const response = await api.getUserPosts();
             const post = response.posts.find(p => p.id === postId);
-            
+
             if (post) {
                 this.showPostEditor(post);
             } else {
@@ -460,7 +526,7 @@ class PostsManager {
         if (!confirm(`Are you sure you want to delete "${postTitle}"? This action cannot be undone.`)) {
             return;
         }
-        
+
         try {
             await api.deletePost(postId);
             showToast('Success', 'Post deleted successfully!', 'success');
@@ -559,22 +625,57 @@ function savePost() {
 }
 
 // Auto-generate slug from title and handle publish toggle
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const titleInput = document.getElementById('postTitle');
     const slugInput = document.getElementById('postSlug');
-    
-    if (titleInput && slugInput) {
-        titleInput.addEventListener('input', function() {
+    const taglineInput = document.getElementById('postTagline');
+
+    // Character counters
+    function updateCounter(input, counterId, maxLength) {
+        const counter = document.getElementById(counterId);
+        if (counter && input) {
+            const currentLength = input.value.length;
+            counter.textContent = `${currentLength}/${maxLength}`;
+            
+            // Add visual warning when approaching limit
+            if (currentLength > maxLength * 0.9) {
+                counter.className = 'text-warning';
+            } else if (currentLength === maxLength) {
+                counter.className = 'text-danger';
+            } else {
+                counter.className = 'text-muted';
+            }
+        }
+    }
+
+    if (titleInput) {
+        titleInput.addEventListener('input', function () {
+            // Auto-generate slug
             if (!slugInput.value || postsManager.currentEditingPost === null) {
                 slugInput.value = slugify(this.value);
+                updateCounter(slugInput, 'slugCounter', 100);
             }
+            // Update title counter
+            updateCounter(this, 'titleCounter', 100);
+        });
+    }
+
+    if (taglineInput) {
+        taglineInput.addEventListener('input', function () {
+            updateCounter(this, 'taglineCounter', 100);
+        });
+    }
+
+    if (slugInput) {
+        slugInput.addEventListener('input', function () {
+            updateCounter(this, 'slugCounter', 100);
         });
     }
 
     // Handle publish toggle changes in post editor
     const publishToggle = document.getElementById('postPublished');
     if (publishToggle) {
-        publishToggle.addEventListener('change', function() {
+        publishToggle.addEventListener('change', function () {
             postsManager.updatePublishToggleLabel(this.checked);
         });
     }

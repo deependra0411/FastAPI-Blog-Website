@@ -2,25 +2,33 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
-        this.initializeAuth();
+        this.isInitialized = false;
+        this.initPromise = this.initializeAuth();
     }
 
     // Initialize authentication state
-    initializeAuth() {
-        const token = localStorage.getItem(CONFIG.TOKEN_KEY);
-        const userData = localStorage.getItem(CONFIG.USER_KEY);
+    async initializeAuth() {
+        // Check if we have a stored token
+        const token = sessionStorage.getItem('access_token');
+        if (!token) {
+            this.currentUser = null;
+            this.updateUIForUnauthenticatedUser();
+            return;
+        }
         
-        if (token && userData) {
-            try {
-                this.currentUser = JSON.parse(userData);
-                this.updateUIForAuthenticatedUser();
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                this.logout();
-            }
-        } else {
+        try {
+            // Verify token by calling the /me endpoint
+            const userData = await api.getCurrentUser();
+            this.currentUser = userData;
+            this.updateUIForAuthenticatedUser();
+        } catch (error) {
+            // Token is invalid, clear it
+            sessionStorage.removeItem('access_token');
+            this.currentUser = null;
             this.updateUIForUnauthenticatedUser();
         }
+        
+        this.isInitialized = true;
     }
 
     // Login user
@@ -28,14 +36,18 @@ class AuthManager {
         try {
             const response = await api.login(email, password);
             
-            // Store token
-            localStorage.setItem(CONFIG.TOKEN_KEY, response.access_token);
+            // Store the token for Authorization header
+            if (response.access_token) {
+                sessionStorage.setItem('access_token', response.access_token);
+            }
             
-            // Get user data
-            const userData = await api.getCurrentUser();
-            localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(userData));
+            // Get user data from response
+            if (response.user) {
+                this.currentUser = response.user;
+            } else {
+                this.currentUser = await api.getCurrentUser();
+            }
             
-            this.currentUser = userData;
             this.updateUIForAuthenticatedUser();
             
             showToast('Success', 'Login successful!', 'success');
@@ -62,17 +74,36 @@ class AuthManager {
     }
 
     // Logout user
-    logout() {
-        localStorage.removeItem(CONFIG.TOKEN_KEY);
-        localStorage.removeItem(CONFIG.USER_KEY);
+    async logout() {
+        try {
+            await api.logout();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+        
+        // Clear stored token
+        sessionStorage.removeItem('access_token');
+        
         this.currentUser = null;
         this.updateUIForUnauthenticatedUser();
         showToast('Success', 'Logout successful!', 'success');
         showPage('home');
     }
 
+    // Wait for auth initialization to complete
+    async waitForInit() {
+        await this.initPromise;
+        return this.isInitialized;
+    }
+
     // Check if user is authenticated
     isAuthenticated() {
+        return !!this.currentUser;
+    }
+
+    // Check if user is authenticated (async version that waits for init)
+    async isAuthenticatedAsync() {
+        await this.waitForInit();
         return !!this.currentUser;
     }
 
@@ -130,8 +161,7 @@ class AuthManager {
 
             const updatedUser = await api.updateUserProfile(profileData);
             
-            // Update stored user data
-            localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(updatedUser));
+            // Update current user data
             this.currentUser = updatedUser;
             
             // Update UI
@@ -275,8 +305,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global logout function
-function logout() {
-    authManager.logout();
+async function logout() {
+    await authManager.logout();
 }
 
 // Global change password function

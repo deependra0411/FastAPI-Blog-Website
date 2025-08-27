@@ -10,6 +10,9 @@ const CONFIG = {
         github: 'https://github.com/'
     },
     TOAST_DURATION: 5000,
-    TOKEN_KEY: 'blog_access_token',
-    USER_KEY: 'blog_user_data'
+    POST_TITLE_MAX_LENGTH: 25,
+    // Form validation limits
+    TITLE_MAX_LENGTH: 100,
+    TAGLINE_MAX_LENGTH: 100,
+    SLUG_MAX_LENGTH: 100
 };
