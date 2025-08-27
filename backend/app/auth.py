@@ -44,8 +44,8 @@ def create_access_token(user_data: dict, expires_delta: Optional[timedelta] = No
         "user_id": user_data["id"],
         "name": user_data["name"],
         "email": user_data["email"],
-        "is_admin": user_data.get("is_admin", False),
-        "is_active": user_data.get("is_active", True),
+        "is_admin": user_data.get("is_admin"),
+        "is_active": user_data.get("is_active"),
         "exp": expire,
         "iat": datetime.utcnow(),  # Issued at
         "type": "access",  # Token type
