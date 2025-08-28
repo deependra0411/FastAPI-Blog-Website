@@ -1,0 +1,29 @@
+# FastAPI and related packages
+fastapi
+uvicorn
+python-multipart
+
+# Database
+asyncpg
+databases
+
+# Authentication
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+
+# Configuration
+pydantic
+pydantic-settings
+
+# CORS
+python-multipart
+
+# Development tools (optional)
+black
+flake8
+pytest
+pytest-asyncio
+
+# Production server (optional)
+gunicorn
