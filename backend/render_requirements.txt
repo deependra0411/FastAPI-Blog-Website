@@ -15,6 +15,7 @@ python-multipart
 # Configuration
 pydantic
 pydantic-settings
+pydantic[email]
 
 # CORS
 python-multipart
