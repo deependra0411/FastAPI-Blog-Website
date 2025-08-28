@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Database settings
     database_url: str = "postgresql://username:password@localhost/blog_db"
+    max_connections: int = 20
+    min_connections: int = 1
+    command_timeout: int = 60
 
     # Security settings
     secret_key: str = "super-secret-key"

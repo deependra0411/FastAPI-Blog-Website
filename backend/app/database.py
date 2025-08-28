@@ -21,8 +21,13 @@ async def init_db():
     """Initialize database connection and create tables"""
     global connection_pool
 
-    # Create connection pool
-    connection_pool = await asyncpg.create_pool(settings.database_url)
+    # Create connection pool with minimal connections for Aiven free tier
+    connection_pool = await asyncpg.create_pool(
+        settings.database_url,
+        min_size=settings.min_connections,
+        max_size=settings.max_connections,
+        command_timeout=settings.command_timeout,
+    )
 
     # Connect to database
     await database.connect()
