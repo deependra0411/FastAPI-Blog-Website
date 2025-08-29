@@ -1,7 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from ..auth import (
     authenticate_user,
@@ -9,9 +8,10 @@ from ..auth import (
     get_current_active_user_from_request,
     get_current_user_with_password,
     get_password_hash,
+    verify_password,
 )
 from ..config import get_settings
-from ..models import Token, UserCreate, UserLogin, UserResponse, UserUpdate
+from ..models import UserCreate, UserLogin, UserResponse, UserUpdate
 from ..repositories import UserRepository
 
 settings = get_settings()
@@ -80,15 +80,8 @@ async def login_user(user: UserLogin, response: Response):
 
     return {
         "message": "Login successful",
-        "access_token": access_token,  # Send token in response for frontend to use
+        "access_token": access_token,
         "token_type": "bearer",
-        "user": {
-            "id": authenticated_user.id,
-            "name": authenticated_user.name,
-            "email": authenticated_user.email,
-            "is_admin": authenticated_user.is_admin,
-            "is_active": authenticated_user.is_active,
-        },
     }
 
 
@@ -97,73 +90,6 @@ async def logout_user(response: Response):
     """Logout user by clearing the access token cookie"""
     response.delete_cookie(key="access_token", httponly=True, samesite="lax")
     return {"message": "Logout successful"}
-
-
-@router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    """OAuth2 compatible token endpoint"""
-    user = await authenticate_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-
-    # Create token with comprehensive user data
-    user_data = {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-        "is_admin": user.is_admin,
-        "is_active": user.is_active,
-    }
-
-    access_token = create_access_token(
-        user_data=user_data, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-@router.get("/debug-auth")
-async def debug_auth(request: Request):
-    """Debug authentication - check cookies and token"""
-    from ..auth import get_token_from_request, verify_token
-
-    # Check what cookies we received
-    cookies = dict(request.cookies)
-
-    # Try to get token
-    token = get_token_from_request(request)
-
-    debug_info = {
-        "cookies_received": cookies,
-        "access_token_found": "access_token" in cookies,
-        "token_extracted": bool(token),
-        "token_length": len(token) if token else 0,
-    }
-
-    if token:
-        try:
-            credentials_exception = HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-            )
-            token_data = verify_token(token, credentials_exception)
-            debug_info["token_valid"] = True
-            debug_info["token_data"] = {
-                "email": token_data.email,
-                "user_id": token_data.user_id,
-                "name": token_data.name,
-                "is_admin": token_data.is_admin,
-                "is_active": token_data.is_active,
-            }
-        except Exception as e:
-            debug_info["token_valid"] = False
-            debug_info["token_error"] = str(e)
-
-    return debug_info
 
 
 @router.get("/me", response_model=UserResponse)
@@ -242,6 +168,12 @@ async def change_password(
         current_password = password_data.get("current_password")
         new_password = password_data.get("new_password")
 
+        if current_password == new_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New password cannot be the same as the current password",
+            )
+
         if not current_password or not new_password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -253,9 +185,6 @@ async def change_password(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="New password must be at least 6 characters long",
             )
-
-        # Import auth functions locally to avoid circular import
-        from ..auth import get_password_hash, verify_password
 
         # Verify current password against the stored hashed password
         if not verify_password(current_password, current_user.password):
