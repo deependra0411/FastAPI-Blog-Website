@@ -308,19 +308,80 @@ footer .fa-stack:hover {
 }
 
 .post-content code {
-    background-color: var(--light-color);
+    background-color: #f8f9fa;
     padding: 0.2rem 0.4rem;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     font-size: 0.875rem;
+    color: #e83e8c;
+    font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    border: 1px solid #e9ecef;
 }
 
 .post-content pre {
-    background-color: var(--dark-color);
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #4a5568;
     overflow-x: auto;
-    margin: 1.5rem 0;
+    margin: 2rem 0;
+    font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    line-height: 1.6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Copy button for code blocks */
+.code-block-wrapper {
+    position: relative;
+    margin: 2rem 0;
+}
+
+.code-copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+    font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+}
+
+.code-block-wrapper:hover .code-copy-btn {
+    opacity: 1;
+}
+
+.code-copy-btn:hover {
+    background: #ffffff;
+    border-color: #0085A1;
+    color: #0085A1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.code-copy-btn.copied {
+    background: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+.code-copy-btn.copied::before {
+    content: "✓ ";
+}
+
+.post-content pre code {
+    background-color: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-size: 0.9rem;
 }
 
 /* Dashboard Styles */
@@ -504,6 +565,30 @@ footer .fa-stack:hover {
     overflow-x: auto;
 }
 
+/* Visual feedback for active code block editing */
+.ql-editor.code-block-active {
+    background-color: #f8f9fa;
+    border: 2px solid #0085A1;
+    border-radius: 0.375rem;
+}
+
+/* Enhanced code block styling in editor */
+.ql-editor .ql-code-block-container {
+    background-color: #2d3748;
+    border: 1px solid #4a5568;
+    border-radius: 0.375rem;
+    margin: 0.5rem 0;
+}
+
+.ql-editor .ql-code-block {
+    background-color: #2d3748;
+    color: #e2e8f0;
+    font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid #4a5568;
+}
+
 /* Responsive adjustments for Quill */
 @media (max-width: 768px) {
     .ql-toolbar {
@@ -514,6 +599,8 @@ footer .fa-stack:hover {
         font-size: 14px;
         min-height: 200px;
     }
+    
+
 }
 
 /* Post Detail Page Styling */
@@ -556,22 +643,11 @@ footer .fa-stack:hover {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
-#postDetailPage .post-content pre {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 0.375rem;
-    border: 1px solid #e9ecef;
-    overflow-x: auto;
-    margin: 1.5rem 0;
-}
 
-#postDetailPage .post-content code {
-    background-color: #f8f9fa;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875em;
-    color: #e83e8c;
-}
+
+
+
+
 
 #postDetailPage .post-content ul,
 #postDetailPage .post-content ol {
@@ -595,7 +671,7 @@ footer .fa-stack:hover {
     line-height: 1.5;
 }
 
-/* Responsive adjustments for post detail */
+/* Responsive adjustments for post detail and code blocks */
 @media (max-width: 768px) {
     #postDetailPage .post-content {
         font-size: 1rem;
@@ -604,5 +680,37 @@ footer .fa-stack:hover {
     
     #postDetailPage .fw-bolder {
         font-size: 1.75rem;
+    }
+    
+    /* Responsive code block adjustments */
+    .post-content pre {
+        padding: 1rem;
+        margin: 1.5rem 0;
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+    }
+    
+    .post-content code {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .post-content pre {
+        padding: 0.75rem;
+        margin: 1rem 0;
+        font-size: 0.8rem;
+    }
+    
+    .post-content code {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.3rem;
+    }
+    
+    .code-copy-btn {
+        top: 0.25rem;
+        right: 0.25rem;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
     }
 }

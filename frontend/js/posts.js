@@ -39,7 +39,67 @@ class PostsManager {
                     ['blockquote', 'code-block'],
                     ['link', 'image'],
                     ['clean']
-                ]
+                ],
+                keyboard: {
+                    bindings: {
+                        // Improved arrow key navigation out of code blocks
+                        'code-block-down-arrow': {
+                            key: 'ArrowDown',
+                            format: ['code-block'],
+                            handler: function(range, context) {
+                                try {
+                                    const [line, offset] = this.quill.getLine(range.index);
+                                    const nextLineIndex = range.index + line.length();
+                                    const nextLine = this.quill.getLine(nextLineIndex)[0];
+                                    
+                                    // If there's no next line or next line is not a code block
+                                    if (!nextLine || !nextLine.formats()['code-block']) {
+                                        // Exit code block and move to next line
+                                        const exitIndex = range.index + line.length();
+                                        this.quill.insertText(exitIndex, '\n', 'user');
+                                        this.quill.setSelection(exitIndex + 1, 0, 'user');
+                                        this.quill.format('code-block', false, 'user');
+                                        return false;
+                                    }
+                                } catch (e) {
+                                    console.log('Arrow navigation error:', e);
+                                }
+                                return true;
+                            }
+                        },
+                        'code-block-up-arrow': {
+                            key: 'ArrowUp',
+                            format: ['code-block'],
+                            handler: function(range, context) {
+                                try {
+                                    const [line, offset] = this.quill.getLine(range.index);
+                                    
+                                    // If at beginning of first code block line
+                                    if (offset === 0) {
+                                        const prevLineIndex = range.index - 1;
+                                        if (prevLineIndex >= 0) {
+                                            const prevLine = this.quill.getLine(prevLineIndex)[0];
+                                            
+                                            // If previous line is not a code block
+                                            if (!prevLine || !prevLine.formats()['code-block']) {
+                                                // Move cursor above code block
+                                                this.quill.setSelection(prevLineIndex, 0, 'user');
+                                                return false;
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    console.log('Arrow navigation error:', e);
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                },
+                clipboard: {
+                    // Basic clipboard handling
+                    matchVisual: false
+                }
             }
         });
 
@@ -56,7 +116,55 @@ class PostsManager {
                 hiddenInput.value = htmlContent;
             }
         });
+
+        // Add additional keyboard shortcuts for better UX
+        this.setupAdditionalKeyboardShortcuts();
     }
+
+    // Setup additional keyboard shortcuts for better code block UX
+    setupAdditionalKeyboardShortcuts() {
+        if (!this.quillEditor) return;
+
+        // Track timing for double enter functionality
+        this.lastEnterTime = 0;
+        this.enterTimeout = 1000; // 1 second window for double enter
+
+        // Enhanced double enter detection with timing - using a more reliable approach
+        this.quillEditor.root.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const selection = this.quillEditor.getSelection();
+                if (selection) {
+                    const [line] = this.quillEditor.getLine(selection.index);
+                    if (line && line.formats()['code-block']) {
+                        const currentTime = Date.now();
+                        const timeSinceLastEnter = currentTime - this.lastEnterTime;
+                        
+                        // Check if current line is empty or whitespace only
+                        const lineText = line.domNode.textContent;
+                        
+                        // If Enter pressed within timeout window on empty line, exit code block
+                        if (timeSinceLastEnter < this.enterTimeout && timeSinceLastEnter > 100 && lineText.trim() === '') {
+                            // Exit code block and add new line
+                            setTimeout(() => {
+                                this.quillEditor.format('code-block', false);
+                                this.quillEditor.insertText(selection.index, '\n');
+                                this.quillEditor.setSelection(selection.index + 1, 0);
+                            }, 10);
+                            this.lastEnterTime = 0; // Reset timer
+                            return;
+                        }
+                        
+                        // Set timer for next enter
+                        this.lastEnterTime = currentTime;
+                    }
+                }
+            }
+        });
+
+
+    }
+
+
 
     // Handle image upload for Quill editor
     async handleImageUpload() {

@@ -170,6 +170,9 @@ class App {
                 </section>
             `;
 
+            // Add copy buttons to code blocks
+            this.addCopyButtonsToCodeBlocks(contentContainer);
+
             // Show edit/delete buttons if user owns the post
             if (authManager.isAuthenticated() && authManager.currentUser) {
                 const currentUser = authManager.currentUser;
@@ -341,6 +344,110 @@ class App {
     // Get current page
     getCurrentPage() {
         return this.currentPage;
+    }
+
+    // Add copy buttons to code blocks
+    addCopyButtonsToCodeBlocks(container) {
+        const codeBlocks = container.querySelectorAll('pre');
+        
+        codeBlocks.forEach((pre, index) => {
+            // Skip if already has a wrapper
+            if (pre.parentElement.classList.contains('code-block-wrapper')) {
+                return;
+            }
+
+            // Create wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-block-wrapper';
+            
+            // Create copy button
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'code-copy-btn';
+            copyBtn.innerHTML = 'Copy';
+            copyBtn.setAttribute('aria-label', 'Copy code to clipboard');
+            copyBtn.setAttribute('title', 'Copy code to clipboard');
+            
+            // Add click event listener
+            copyBtn.addEventListener('click', () => {
+                this.copyCodeToClipboard(pre, copyBtn);
+            });
+
+            // Wrap the pre element and add button
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+            wrapper.appendChild(copyBtn);
+        });
+    }
+
+    // Copy code block content to clipboard
+    async copyCodeToClipboard(preElement, button) {
+        try {
+            // Get text content, preserving line breaks
+            const code = preElement.textContent || preElement.innerText;
+            
+            // Use modern clipboard API if available
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(code);
+            } else {
+                // Fallback for older browsers
+                this.fallbackCopyToClipboard(code);
+            }
+
+            // Visual feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = 'Copied!';
+            button.classList.add('copied');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+
+            // Show toast notification
+            if (typeof showToast !== 'undefined') {
+                showToast('Success', 'Code copied to clipboard!', 'success');
+            }
+
+        } catch (err) {
+            console.error('Failed to copy code:', err);
+            
+            // Show error feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = 'Error';
+            button.style.background = '#dc3545';
+            button.style.color = 'white';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '';
+                button.style.color = '';
+            }, 2000);
+
+            if (typeof showToast !== 'undefined') {
+                showToast('Error', 'Failed to copy code to clipboard', 'error');
+            }
+        }
+    }
+
+    // Fallback copy method for older browsers
+    fallbackCopyToClipboard(text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            throw new Error('Fallback copy failed');
+        }
+        
+        document.body.removeChild(textArea);
     }
 }
 
