@@ -158,8 +158,8 @@ class ApiClient {
         return this.delete(`/posts/delete/${postId}`);
     }
 
-    async getUserPosts(page = 1, perPage = 10) {
-        return this.get(`/posts/user/my-posts?page=${page}&per_page=${perPage}`);
+    async getUserPosts(postId) {
+        return this.get(`/posts/user/my-post?post_id=${postId}`);
     }
 
     async getAllUserPosts(page = 1, perPage = 10, showUnpublished = false) {

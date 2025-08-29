@@ -206,26 +206,25 @@ async def delete_post(
     return {"message": "Post deleted successfully", "success": True}
 
 
-@router.get("/user/my-posts", response_model=PostListResponse)
+@router.get("/user/my-post", response_model=PostResponse)
 async def get_user_posts(
     request: Request,
-    page: int = Query(1, ge=1),
-    per_page: int = Query(10, ge=1, le=100),
+    post_id: int,
 ):
     """Get current user's posts"""
     current_user = await get_current_active_user_from_request(request)
-    posts, total = await PostRepository.get_posts_by_author(
-        author_id=current_user.id, page=page, per_page=per_page
-    )
-    total_pages = ceil(total / per_page)
+    post = await PostRepository.get_post_by_id(post_id=post_id)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Post not found"
+        )
+    if post.author_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to view this post",
+        )
 
-    return PostListResponse(
-        posts=[PostResponse(**post.model_dump()) for post in posts],
-        total=total,
-        page=page,
-        per_page=per_page,
-        total_pages=total_pages,
-    )
+    return post
 
 
 @router.put("/{post_id}/toggle-visibility")

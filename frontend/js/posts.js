@@ -615,8 +615,8 @@ class PostsManager {
     async editPost(postId) {
         try {
             // Get user posts to find the one being edited
-            const response = await api.getUserPosts();
-            const post = response.posts.find(p => p.id === postId);
+            const response = await api.getUserPosts(postId);
+            const post = response;
 
             if (post) {
                 this.showPostEditor(post);
