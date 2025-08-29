@@ -1,7 +1,7 @@
 // Configuration settings for the frontend application
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:8000/api/v1',
-    // API_BASE_URL: 'https://fastapi-blog-website.onrender.com/api/v1',
+    // API_BASE_URL: 'http://localhost:8000/api/v1',
+    API_BASE_URL: 'https://fastapi-blog-website.onrender.com/api/v1',
     APP_NAME: 'Python Coders',
     APP_TAGLINE: 'Start Learning Today',
     POSTS_PER_PAGE: 10,
